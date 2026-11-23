@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Architect Prep</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Schibsted+Grotesk:wght@600;700;800&display=swap">
+<style>
+/* Layout: one centered study column (max 880px) under a sticky tab bar; card treatment only for the active question, options and module tiles. */
+:root{
+  --bg:#f2f4f8;--surface:#ffffff;--sunk:#e7ebf2;--ink:#121826;--muted:#566176;--line:#d6dce7;
+  --accent:#2343c2;--accent-soft:#e2e7fa;--on-accent:#ffffff;
+  --ok:#17744b;--ok-bg:#e2f2e9;--bad:#b0212e;--bad-bg:#fae6e8;--warn:#8a5900;--warn-bg:#faefd4;
+  --f-display:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e121a;--surface:#161b26;--sunk:#1d2330;--ink:#e6e9f0;--muted:#9aa3b6;--line:#2a3242;
+  --accent:#8099ff;--accent-soft:#1f2747;--on-accent:#0e121a;
+  --ok:#5fcf98;--ok-bg:#14291f;--bad:#ff8b92;--bad-bg:#311619;--warn:#f0bd5a;--warn-bg:#2d2411;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e121a;--surface:#161b26;--sunk:#1d2330;--ink:#e6e9f0;--muted:#9aa3b6;--line:#2a3242;
+  --accent:#8099ff;--accent-soft:#1f2747;--on-accent:#0e121a;
+  --ok:#5fcf98;--ok-bg:#14291f;--bad:#ff8b92;--bad-bg:#311619;--warn:#f0bd5a;--warn-bg:#2d2411;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.3rem;font-weight:700}
+h3{font-size:1.02rem;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-size:.82em;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;align-items:baseline;gap:8px;font-family:var(--f-display);font-weight:800;font-size:1.05rem;color:var(--ink);text-decoration:none;white-space:nowrap}
+.brand small{font-family:var(--f-mono);font-weight:500;font-size:.7rem;color:var(--muted);letter-spacing:.04em}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-left:auto;max-width:100%}
+nav.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);text-decoration:none;font-weight:600;font-size:.88rem;white-space:nowrap}
+nav.tabs a:hover{color:var(--ink);background:var(--sunk)}
+nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+
+main.wrap{padding-block:28px 64px;display:flex;flex-direction:column;gap:32px}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);max-width:62ch}
+
+/* buttons */
+.btn{appearance:none;border:1px solid transparent;background:var(--accent);color:var(--on-accent);font:600 .92rem/1 var(--f-body);padding:11px 16px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;min-height:42px}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{background:var(--sunk)}
+.btn.danger{background:transparent;color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:7px 11px;min-height:34px;font-size:.84rem}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spacer{flex:1}
+
+/* stats strip */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.stat{background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--f-display);font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--muted)}
+
+.banner{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 16px;border-radius:var(--r);background:var(--accent-soft);border:1px solid var(--accent)}
+.banner p{flex:1;min-width:200px}
+
+/* modules */
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.mod{appearance:none;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;cursor:pointer}
+.mod:hover{border-color:var(--accent)}
+.mod .h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.mod .code{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.mod .name{font-weight:600;line-height:1.3}
+.meter{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden;display:flex}
+.meter i{display:block;height:100%}
+.meter .ok{background:var(--ok)}.meter .bad{background:var(--bad)}
+.mod .foot{display:flex;justify-content:space-between;gap:8px;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.pill.lv-solid,.pill.lv-comp{background:var(--ok-bg);color:var(--ok)}
+.pill.lv-prog{background:var(--warn-bg);color:var(--warn)}
+.pill.lv-nov{background:var(--bad-bg);color:var(--bad)}
+.pill.pass{background:var(--ok-bg);color:var(--ok)}.pill.fail{background:var(--bad-bg);color:var(--bad)}
+
+/* forms */
+fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+legend{font-weight:600;margin-bottom:8px;padding:0}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choice{position:relative}
+.choice input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.choice span{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:.88rem;font-weight:500;cursor:pointer}
+.choice input:checked+span{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.choice input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:20px}
+input[type=number],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{font-family:var(--f-mono);font-size:.78rem;min-height:140px;resize:vertical}
+label.field{display:flex;flex-direction:column;gap:5px;font-size:.88rem;font-weight:500}
+
+/* quiz */
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.timer{font-size:1rem;padding:4px 10px;border-radius:7px;background:var(--sunk)}
+.timer.low{background:var(--bad-bg);color:var(--bad)}
+.progress{height:4px;border-radius:2px;background:var(--sunk);overflow:hidden}
+.progress span{display:block;height:100%;background:var(--accent);transition:width .2s}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:18px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.meta .qid{margin-left:auto;color:var(--muted)}
+.chip{font-size:.74rem;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--sunk);color:var(--muted)}
+.chip.d-basic{color:var(--ok)}.chip.d-intermediate{color:var(--warn)}.chip.d-advanced{color:var(--bad)}
+.stem{font-family:var(--f-body);font-size:1.18rem;font-weight:600;line-height:1.45;outline:none}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{appearance:none;font:inherit;color:inherit;text-align:left;width:100%;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .letter{flex:none;width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:.85rem;background:var(--sunk);color:var(--muted)}
+.opt .otext{flex:1;min-width:0;padding-top:3px}
+.opt .mark{flex:none;font-size:.76rem;font-weight:700;padding-top:5px;white-space:nowrap}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.sel .letter{background:var(--accent);color:var(--on-accent)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.right .letter{background:var(--ok);color:var(--on-accent)}
+.opt.right .mark{color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .letter{background:var(--bad);color:var(--on-accent)}
+.opt.wrong .mark{color:var(--bad)}
+.opt.dim{opacity:.6}
+.explain{border-radius:10px;padding:14px 16px;border:1px solid var(--line);background:var(--sunk);display:flex;flex-direction:column;gap:6px}
+.explain.ok{border-color:var(--ok)}.explain.bad{border-color:var(--bad)}
+.explain .verdict{font-weight:700}
+.explain.ok .verdict{color:var(--ok)}.explain.bad .verdict{color:var(--bad)}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tags span{font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.star{appearance:none;border:1px solid var(--line);background:transparent;color:var(--muted);font:600 .76rem var(--f-body);padding:3px 8px;border-radius:6px;cursor:pointer}
+.star[aria-pressed="true"]{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
+.dots{display:flex;flex-wrap:wrap;gap:5px}
+.dot{appearance:none;width:30px;height:30px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 .72rem var(--f-mono);cursor:pointer}
+.dot.ans{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.dot.cur{outline:2px solid var(--ink);outline-offset:1px}
+.confirm{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-radius:10px;background:var(--warn-bg);color:var(--warn)}
+.confirm p{flex:1;min-width:180px;font-weight:600}
+.kbd{font-size:.8rem}
+.kbd kbd{font-family:var(--f-mono);font-size:.74rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface);color:var(--ink)}
+
+/* results */
+.score{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end}
+.score .big{font-family:var(--f-display);font-size:3.4rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+td .meter{width:90px}
+.breakdowns{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.rev{display:flex;flex-direction:column;gap:10px}
+.ritem{background:var(--surface);border:1px solid var(--line);border-left-width:4px;border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.ritem.ok{border-left-color:var(--ok)}.ritem.bad{border-left-color:var(--bad)}.ritem.skip{border-left-color:var(--muted)}
+.ritem .ans{font-size:.88rem}
+.ritem .ans b{font-weight:600}
+.hist{display:flex;flex-direction:column}
+.hist div{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem;align-items:center}
+.hist div:last-child{border-bottom:0}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0}
+details summary{cursor:pointer;padding:14px 16px;font-weight:600;list-style-position:inside}
+details .body{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px}
+blockquote{margin:0;padding:12px 16px;border-left:3px solid var(--accent);background:var(--sunk);border-radius:0 8px 8px 0;font-style:italic;max-width:70ch}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;max-width:70ch}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.out{display:flex;flex-direction:column;gap:0}
+.out div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.out div:last-child{border-bottom:0}
+.out b{font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.9rem}
+.formula{font-family:var(--f-mono);font-size:.76rem;color:var(--muted);white-space:pre;overflow-x:auto;background:var(--sunk);padding:12px;border-radius:8px}
+.note{font-size:.84rem;padding:10px 12px;border-radius:8px;background:var(--warn-bg);color:var(--warn)}
+footer.wrap{padding-block:0 32px;font-size:.78rem;color:var(--muted)}
+
+@media (max-width:560px){
+  h1{font-size:1.45rem}
+  .qcard{padding:16px}
+  .stem{font-size:1.06rem}
+  .score .big{font-size:2.8rem}
+  nav.tabs{margin-left:0;width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio">AI Architect Prep <small>96 PREGUNTAS · 12 MÓDULOS</small></a>
+    <nav class="tabs" aria-label="Secciones">
+      <a href="#inicio" data-r="inicio">Inicio</a>
+      <a href="#practica" data-r="practica">Práctica</a>
+      <a href="#examen" data-r="examen">Examen</a>
+      <a href="#repaso" data-r="repaso">Repaso</a>
+      <a href="#simulador" data-r="simulador">Simulador ROI</a>
+      <a href="#entrevista" data-r="entrevista">Entrevista</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<footer class="wrap" id="foot"></footer>
+<div id="live" class="sr" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const BANK = [{"id":"AG-001","module_id":"AG","difficulty":"basic","kind":"scenario","stem":"¿Qué distingue principalmente a un agente con herramientas de un chatbot de preguntas y respuestas?","options":[{"id":"A","text":"Siempre razona correctamente sin supervisión."},{"id":"B","text":"No necesita un modelo de lenguaje."},{"id":"C","text":"Debe tener obligatoriamente varios agentes subordinados."},{"id":"D","text":"Puede decidir invocar herramientas para consultar o actuar dentro de límites autorizados."}],"correct_option_id":"D","explanation":"La capacidad de usar herramientas y mantener un ciclo de tareas permite superar la mera conversación.","tags":["agent","tools"],"locale":"es-UY","version":1},{"id":"AG-002","module_id":"AG","difficulty":"basic","kind":"concept","stem":"¿Qué aporta RAG a una respuesta generada por un LLM?","options":[{"id":"A","text":"Reentrena los pesos del modelo en cada pregunta."},{"id":"B","text":"Garantiza que nunca exista una alucinación."},{"id":"C","text":"Convierte automáticamente los documentos en reglas infalibles."},{"id":"D","text":"Recupera información externa relevante para fundamentar la respuesta."}],"correct_option_id":"D","explanation":"RAG añade contexto recuperado; no equivale a fine-tuning ni garantiza veracidad.","tags":["rag","grounding"],"locale":"es-UY","version":1},{"id":"AG-003","module_id":"AG","difficulty":"intermediate","kind":"scenario","stem":"Una solicitud tiene pasos fijos, reglas claras y datos estructurados. ¿Qué arquitectura suele ser preferible?","options":[{"id":"A","text":"Un chatbot sin acceso a APIs."},{"id":"B","text":"Un workflow determinista, usando IA solo si alguna etapa lo justifica."},{"id":"C","text":"Un equipo de cinco agentes que negocien cada paso."},{"id":"D","text":"Un LLM que ejecute comandos libremente."}],"correct_option_id":"B","explanation":"La automatización clásica mejora predictibilidad, costo y auditabilidad cuando no se necesita juicio probabilístico.","tags":["workflow","tradeoff"],"locale":"es-UY","version":1},{"id":"AG-004","module_id":"AG","difficulty":"intermediate","kind":"concept","stem":"¿Cuál es una desventaja habitual de introducir múltiples agentes sin necesidad?","options":[{"id":"A","text":"Impide usar APIs externas."},{"id":"B","text":"Aumenta latencia, coste y complejidad de observación y coordinación."},{"id":"C","text":"Hace imposible utilizar RAG."},{"id":"D","text":"Elimina todos los riesgos de seguridad."}],"correct_option_id":"B","explanation":"Más agentes no garantizan mejores resultados y suelen dificultar diagnóstico y control.","tags":["multi-agent","tradeoff"],"locale":"es-UY","version":1},{"id":"AG-005","module_id":"AG","difficulty":"advanced","kind":"scenario","stem":"¿Qué estrategia reduce alucinaciones cuando la KB no contiene evidencia suficiente?","options":[{"id":"A","text":"Aumentar la temperatura al máximo."},{"id":"B","text":"Abstenerse, explicar la ausencia de evidencia y escalar o solicitar contexto."},{"id":"C","text":"Inventar una respuesta plausible para no frustrar al usuario."},{"id":"D","text":"Suprimir todas las citas para ocultar el problema."}],"correct_option_id":"B","explanation":"Una respuesta fundada debe reconocer sus límites en lugar de simular certeza.","tags":["grounding","uncertainty"],"locale":"es-UY","version":1},{"id":"AG-006","module_id":"AG","difficulty":"intermediate","kind":"concept","stem":"¿Qué describe mejor structured outputs?","options":[{"id":"A","text":"Un vector embedding generado al responder."},{"id":"B","text":"Una respuesta larga en Markdown sin estructura fija."},{"id":"C","text":"Un reemplazo de la autenticación."},{"id":"D","text":"Una salida ajustada a un esquema que el backend debe validar."}],"correct_option_id":"D","explanation":"Los esquemas JSON u otros contratos permiten integrar resultados; la validación sigue siendo responsabilidad del sistema.","tags":["schemas"],"locale":"es-UY","version":1},{"id":"AG-007","module_id":"AG","difficulty":"basic","kind":"concept","stem":"¿Qué factor afecta más directamente el costo de inferencia de un LLM?","options":[{"id":"A","text":"Número de agentes dibujados en un diagrama sin ejecución."},{"id":"B","text":"Tokens procesados, modelo elegido y cantidad de llamadas."},{"id":"C","text":"Nombre de la rama de Git."},{"id":"D","text":"Color del dashboard de React."}],"correct_option_id":"B","explanation":"Coste y latencia se relacionan con volumen de tokens, tipo de modelo y uso real.","tags":["cost","tokens"],"locale":"es-UY","version":1},{"id":"AG-008","module_id":"AG","difficulty":"advanced","kind":"scenario","stem":"¿Qué significa que un agente sea autónomo de forma controlada?","options":[{"id":"A","text":"Que pueda modificar cualquier sistema sin aprobación."},{"id":"B","text":"Que actúe dentro de permisos, presupuesto y políticas explícitas con límites verificables."},{"id":"C","text":"Que nunca deba consultar servicios externos."},{"id":"D","text":"Que su cadena de pensamientos interna se almacene íntegra y públicamente."}],"correct_option_id":"B","explanation":"La autonomía empresarial exige límites, observabilidad y posibilidad de intervención humana.","tags":["autonomy","governance"],"locale":"es-UY","version":1},{"id":"OR-001","module_id":"OR","difficulty":"basic","kind":"scenario","stem":"¿Qué es function calling en un agente?","options":[{"id":"A","text":"La generación automática de interfaces React completas."},{"id":"B","text":"Una técnica que evita autenticación en las APIs."},{"id":"C","text":"Una forma de permitir acceso irrestricto al sistema operativo."},{"id":"D","text":"Un mecanismo para solicitar una operación tipada que ejecuta código del sistema anfitrión."}],"correct_option_id":"D","explanation":"El modelo elige una herramienta y argumentos; la aplicación valida y ejecuta la operación.","tags":["tool-calling"],"locale":"es-UY","version":1},{"id":"OR-002","module_id":"OR","difficulty":"intermediate","kind":"scenario","stem":"Un agente reintenta crear un ticket después de un timeout. ¿Qué control previene tickets duplicados?","options":[{"id":"A","text":"Aumentar la temperatura del modelo."},{"id":"B","text":"Una clave de idempotencia asociada a la solicitud."},{"id":"C","text":"Agregar dos agentes supervisores nuevos."},{"id":"D","text":"Desactivar el logging para acelerar."}],"correct_option_id":"B","explanation":"La idempotencia hace que una repetición de la misma operación no duplique el efecto externo.","tags":["idempotency","retries"],"locale":"es-UY","version":1},{"id":"OR-003","module_id":"OR","difficulty":"basic","kind":"concept","stem":"¿Para qué sirve MCP en una arquitectura de agentes?","options":[{"id":"A","text":"Definir exclusivamente estilos CSS de la interfaz."},{"id":"B","text":"Estandarizar el acceso a herramientas y recursos expuestos por servidores compatibles."},{"id":"C","text":"Sustituir automáticamente el LLM por una base SQL."},{"id":"D","text":"Garantizar sin configuración que todos los permisos sean seguros."}],"correct_option_id":"B","explanation":"MCP facilita integración; identidad, permisos y validación siguen siendo necesarios.","tags":["mcp","integration"],"locale":"es-UY","version":1},{"id":"OR-004","module_id":"OR","difficulty":"intermediate","kind":"concept","stem":"¿Cuál es una diferencia útil entre MCP y A2A?","options":[{"id":"A","text":"A2A elimina la necesidad de control de acceso."},{"id":"B","text":"Ambos son formatos de imagen."},{"id":"C","text":"MCP solo maneja mensajes entre agentes y A2A solo SQL."},{"id":"D","text":"MCP se centra en herramientas/recursos; A2A aborda interacción entre agentes."}],"correct_option_id":"D","explanation":"Los protocolos cubren problemas de interoperabilidad relacionados, pero distintos.","tags":["mcp","a2a"],"locale":"es-UY","version":1},{"id":"OR-005","module_id":"OR","difficulty":"advanced","kind":"scenario","stem":"Un supervisor delega una tarea a tres agentes. ¿Cuál es un riesgo que debe mitigarse?","options":[{"id":"A","text":"Que ninguna tarea pueda requerir aprobación humana."},{"id":"B","text":"Que desaparezcan los costos de herramientas."},{"id":"C","text":"Que la aplicación ya no necesite testing."},{"id":"D","text":"Bucles, duplicación de acciones y pérdida de contexto o propiedad de tarea."}],"correct_option_id":"D","explanation":"Handoffs requieren estado compartido controlado, presupuestos, límites y trazabilidad.","tags":["supervisor","handoff"],"locale":"es-UY","version":1},{"id":"OR-006","module_id":"OR","difficulty":"intermediate","kind":"concept","stem":"¿Qué es human-in-the-loop en una remediación de producción?","options":[{"id":"A","text":"Reemplazar logs por conversaciones."},{"id":"B","text":"Punto explícito de aprobación antes de una acción sensible, con evidencia e identidad."},{"id":"C","text":"Pedir al usuario que escriba prompts más largos."},{"id":"D","text":"Permitir al agente aprobar sus propias acciones críticas."}],"correct_option_id":"B","explanation":"Una aprobación con contexto reduce riesgo y separa recomendación de autorización.","tags":["hitl","approval"],"locale":"es-UY","version":1},{"id":"OR-007","module_id":"OR","difficulty":"advanced","kind":"concept","stem":"¿Cómo conviene manejar los resultados de una herramienta que devuelve texto no confiable?","options":[{"id":"A","text":"Ejecutar instrucciones que aparezcan en el texto retornado."},{"id":"B","text":"Desactivar controles de permisos durante ese paso."},{"id":"C","text":"Insertarlos como nuevas instrucciones de sistema."},{"id":"D","text":"Tratarlos como datos, validar estructura y nunca otorgarles autoridad para cambiar políticas."}],"correct_option_id":"D","explanation":"Las salidas de herramientas y documentos son superficies de prompt injection.","tags":["prompt-injection","tools"],"locale":"es-UY","version":1},{"id":"OR-008","module_id":"OR","difficulty":"intermediate","kind":"concept","stem":"¿Qué patrón conviene para una tarea de soporte con decisiones probabilísticas y acciones de escritura?","options":[{"id":"A","text":"El LLM ejecuta comandos directamente en producción."},{"id":"B","text":"Todo se resuelve con embeddings sin orquestación."},{"id":"C","text":"La UI React decide privilegios y se confía en ella."},{"id":"D","text":"LLM propone y clasifica; un workflow validado aplica reglas y ejecuta con autorización."}],"correct_option_id":"D","explanation":"Separar planeamiento probabilístico de efectos deterministas facilita control y auditoría.","tags":["workflow","actions"],"locale":"es-UY","version":1},{"id":"AZ-001","module_id":"AZ","difficulty":"basic","kind":"concept","stem":"¿Qué servicio es una opción central para alojar y gestionar agentes de IA en el ecosistema Microsoft Foundry?","options":[{"id":"A","text":"GitHub Pages."},{"id":"B","text":"Azure DNS únicamente."},{"id":"C","text":"Azure Storage Explorer."},{"id":"D","text":"Foundry Agent Service."}],"correct_option_id":"D","explanation":"Foundry Agent Service aporta capacidades administradas para construir y operar agentes.","tags":["foundry","agent-service"],"locale":"es-UY","version":1},{"id":"AZ-002","module_id":"AZ","difficulty":"basic","kind":"concept","stem":"¿Qué producto usarías para desplegar y consumir modelos OpenAI a través de Azure?","options":[{"id":"A","text":"PowerPoint sin servicios externos."},{"id":"B","text":"Azure Blob Storage como modelo generativo."},{"id":"C","text":"Azure Firewall como motor LLM."},{"id":"D","text":"Azure OpenAI dentro de la plataforma Azure AI/Foundry vigente."}],"correct_option_id":"D","explanation":"Los modelos se consumen mediante recursos/endpoints administrados con controles Azure.","tags":["azure-openai"],"locale":"es-UY","version":1},{"id":"AZ-003","module_id":"AZ","difficulty":"intermediate","kind":"concept","stem":"¿Qué ofrece Microsoft Agent Framework?","options":[{"id":"A","text":"Un motor CSS de React."},{"id":"B","text":"Un antivirus para máquinas virtuales."},{"id":"C","text":"SDK y patrones para construir agentes y orquestaciones en aplicaciones."},{"id":"D","text":"Un sistema de ticketing corporativo listo para usar."}],"correct_option_id":"C","explanation":"El framework organiza agentes, herramientas y flujos; no reemplaza ITSM ni gestión de infraestructura.","tags":["agent-framework"],"locale":"es-UY","version":1},{"id":"AZ-004","module_id":"AZ","difficulty":"intermediate","kind":"concept","stem":"¿Para qué seleccionarías Azure Functions en un sistema agéntico?","options":[{"id":"A","text":"Garantizar resultados de RCA sin telemetría."},{"id":"B","text":"Ejecutar lógica de integración y endpoints de herramientas orientados a eventos."},{"id":"C","text":"Hospedar obligatoriamente todas las pantallas React."},{"id":"D","text":"Reemplazar un sistema de autorización con prompts."}],"correct_option_id":"B","explanation":"Functions es útil para APIs de herramientas y jobs event-driven.","tags":["functions"],"locale":"es-UY","version":1},{"id":"AZ-005","module_id":"AZ","difficulty":"intermediate","kind":"concept","stem":"¿Dónde es natural implementar conectores empresariales con aprobación y pasos definidos?","options":[{"id":"A","text":"Un prompt sin backend."},{"id":"B","text":"Azure Logic Apps, si los conectores y requisitos encajan."},{"id":"C","text":"Un servicio de indexación vectorial exclusivo."},{"id":"D","text":"Un navegador del usuario con secretos embebidos."}],"correct_option_id":"B","explanation":"Logic Apps permite coordinar integraciones; debe combinarse con controles de autorización.","tags":["logic-apps"],"locale":"es-UY","version":1},{"id":"AZ-006","module_id":"AZ","difficulty":"basic","kind":"concept","stem":"¿Cuál es el uso principal de Azure Application Insights en este proyecto?","options":[{"id":"A","text":"Generar una app móvil sin código."},{"id":"B","text":"Editar pólizas de seguro automáticamente."},{"id":"C","text":"Registrar dominios de Internet."},{"id":"D","text":"Observar solicitudes, excepciones, rendimiento y telemetría de aplicación."}],"correct_option_id":"D","explanation":"Application Insights forma parte de la observabilidad que ayuda al diagnóstico y la correlación.","tags":["application-insights"],"locale":"es-UY","version":1},{"id":"AZ-007","module_id":"AZ","difficulty":"advanced","kind":"concept","stem":"¿Qué decisión tomar ante una funcionalidad Azure todavía en preview?","options":[{"id":"A","text":"Usarla en producción crítica sin evaluaciones."},{"id":"B","text":"Asumir compatibilidad permanente sin revisar documentación."},{"id":"C","text":"Ignorar requisitos de región y residencia."},{"id":"D","text":"Validar soporte, limitaciones, roadmap y estrategia de reemplazo antes de depender de ella."}],"correct_option_id":"D","explanation":"La disponibilidad y evolución de productos cloud requieren due diligence técnica.","tags":["preview","architecture"],"locale":"es-UY","version":1},{"id":"AZ-008","module_id":"AZ","difficulty":"advanced","kind":"concept","stem":"¿Qué combinación implementa mejor credenciales seguras para una Function que accede a recursos Azure?","options":[{"id":"A","text":"Claves API dentro del bundle React."},{"id":"B","text":"Managed Identity, RBAC mínimo y secretos en Key Vault solo cuando sean necesarios."},{"id":"C","text":"Credenciales escritas en tickets para que el agente las encuentre."},{"id":"D","text":"Una cuenta admin compartida sin auditoría."}],"correct_option_id":"B","explanation":"Managed identities evitan secretos persistentes y RBAC reduce privilegios.","tags":["identity","security"],"locale":"es-UY","version":1},{"id":"RG-001","module_id":"RG","difficulty":"basic","kind":"concept","stem":"¿Qué representa un embedding de texto?","options":[{"id":"A","text":"Una copia cifrada que siempre mantiene ACL automáticamente."},{"id":"B","text":"Una contraseña reversible."},{"id":"C","text":"Una representación numérica que preserva relaciones semánticas para búsquedas/similitud."},{"id":"D","text":"Una explicación generada con fuentes."}],"correct_option_id":"C","explanation":"Los embeddings ayudan a recuperar contenido relacionado, pero no reemplazan texto ni autorización.","tags":["embeddings"],"locale":"es-UY","version":1},{"id":"RG-002","module_id":"RG","difficulty":"intermediate","kind":"concept","stem":"¿Por qué usar hybrid search para una KB técnica?","options":[{"id":"A","text":"Sustituye el control de acceso por rankings."},{"id":"B","text":"Combina señales léxicas precisas con similitud vectorial semántica."},{"id":"C","text":"Evita indexar contenido."},{"id":"D","text":"Garantiza cero latencia."}],"correct_option_id":"B","explanation":"Los identificadores exactos y la similitud semántica suelen complementarse.","tags":["hybrid-search"],"locale":"es-UY","version":1},{"id":"RG-003","module_id":"RG","difficulty":"intermediate","kind":"concept","stem":"¿Cuál es un riesgo de un chunking demasiado agresivo?","options":[{"id":"A","text":"Permitir automáticamente transacciones de escritura."},{"id":"B","text":"Hacer innecesario almacenar metadatos."},{"id":"C","text":"Convertir todos los textos a PDF."},{"id":"D","text":"Separar una condición o excepción importante de la instrucción recuperada."}],"correct_option_id":"D","explanation":"Los chunks deben preservar contexto suficiente, referencias y estructura del documento.","tags":["chunking"],"locale":"es-UY","version":1},{"id":"RG-004","module_id":"RG","difficulty":"advanced","kind":"scenario","stem":"Dos clientes tienen documentos similares en la KB. ¿Qué es imprescindible antes de enviar fragmentos al LLM?","options":[{"id":"A","text":"Desactivar logs para reducir riesgo."},{"id":"B","text":"Filtrar recuperación por permisos del usuario y tenant."},{"id":"C","text":"Recuperar primero todos los documentos y pedir al modelo que ignore los privados."},{"id":"D","text":"Elegir el chunk con el texto más largo."}],"correct_option_id":"B","explanation":"Los controles de autorización deben aplicarse en retrieval/herramientas y no delegarse a un prompt.","tags":["acl","multi-tenant"],"locale":"es-UY","version":1},{"id":"RG-005","module_id":"RG","difficulty":"basic","kind":"concept","stem":"¿Qué hace un semantic reranker?","options":[{"id":"A","text":"Agrega autenticación a todos los documentos."},{"id":"B","text":"Reordena resultados candidatos para mejorar relevancia contextual."},{"id":"C","text":"Reentrena el modelo base permanentemente."},{"id":"D","text":"Elimina la necesidad de fuentes verificables."}],"correct_option_id":"B","explanation":"El reranking opera sobre resultados recuperados, normalmente después de la búsqueda inicial.","tags":["reranking"],"locale":"es-UY","version":1},{"id":"RG-006","module_id":"RG","difficulty":"advanced","kind":"scenario","stem":"La KB responde con una política antigua que ya fue modificada. ¿Qué falla principal sugiere?","options":[{"id":"A","text":"Que las métricas de CPU son demasiado altas."},{"id":"B","text":"Una falta inevitable de más agentes conversacionales."},{"id":"C","text":"Problemas de frescura, versionado o selección de fuente de verdad."},{"id":"D","text":"Que React no tenga animaciones."}],"correct_option_id":"C","explanation":"El ciclo de actualización e indexación y los metadatos de vigencia son esenciales.","tags":["freshness","versioning"],"locale":"es-UY","version":1},{"id":"RG-007","module_id":"RG","difficulty":"intermediate","kind":"concept","stem":"¿Qué métrica permite saber si una búsqueda trae los documentos relevantes?","options":[{"id":"A","text":"Solo número de tokens generados."},{"id":"B","text":"Cantidad de usuarios logueados en GitHub."},{"id":"C","text":"Tamaño visual del botón de búsqueda."},{"id":"D","text":"Retrieval recall medido contra un conjunto etiquetado."}],"correct_option_id":"D","explanation":"La calidad del retrieval se mide con preguntas y relevancia documentada, no solo con opinión.","tags":["evaluation","retrieval"],"locale":"es-UY","version":1},{"id":"RG-008","module_id":"RG","difficulty":"advanced","kind":"scenario","stem":"¿Cómo debe actuar un agente que obtiene una cita textual pero la fuente no respalda la conclusión?","options":[{"id":"A","text":"No presentar la conclusión como fundamentada; corregir respuesta o abstenerse."},{"id":"B","text":"Incluir la cita igual porque una URL garantiza exactitud."},{"id":"C","text":"Elevar automáticamente privilegios para buscar otros tenants."},{"id":"D","text":"Eliminar el fragmento que contradice la respuesta."}],"correct_option_id":"A","explanation":"Citation accuracy y faithfulness deben evaluarse de manera explícita.","tags":["citations","faithfulness"],"locale":"es-UY","version":1},{"id":"IT-001","module_id":"IT","difficulty":"basic","kind":"concept","stem":"¿Qué diferencia un incidente de un problema en ITSM?","options":[{"id":"A","text":"Problema es exclusivamente una mejora comercial."},{"id":"B","text":"Incidente es una interrupción o degradación; problema busca causas subyacentes de incidentes."},{"id":"C","text":"Incidente siempre es una solicitud de acceso, problema siempre un bug de UI."},{"id":"D","text":"Son términos intercambiables y tienen la misma finalidad."}],"correct_option_id":"B","explanation":"Incident management restaura servicio; problem management analiza causas y prevención.","tags":["itil","incident","problem"],"locale":"es-UY","version":1},{"id":"IT-002","module_id":"IT","difficulty":"intermediate","kind":"concept","stem":"¿Cómo debe inferirse la prioridad de un ticket según principios ITSM?","options":[{"id":"A","text":"A partir de impacto y urgencia, junto con política de servicio."},{"id":"B","text":"Siempre máxima para los tickets de brokers."},{"id":"C","text":"Solo por el sentimiento del usuario detectado por IA."},{"id":"D","text":"Solo por longitud del título."}],"correct_option_id":"A","explanation":"La prioridad combina urgencia e impacto, y se ajusta a criterios acordados.","tags":["priority","triage"],"locale":"es-UY","version":1},{"id":"IT-003","module_id":"IT","difficulty":"basic","kind":"concept","stem":"¿Qué significa First Contact Resolution (FCR)?","options":[{"id":"A","text":"Resolución efectiva de un caso en el primer contacto, según definición operacional."},{"id":"B","text":"Cantidad de mensajes enviados por el chatbot."},{"id":"C","text":"Porcentaje de tickets cerrados sin validación."},{"id":"D","text":"Promedio de llamadas de herramientas por sesión."}],"correct_option_id":"A","explanation":"FCR requiere una definición consistente de resolución para evitar métricas engañosas.","tags":["fcr","kpi"],"locale":"es-UY","version":1},{"id":"IT-004","module_id":"IT","difficulty":"intermediate","kind":"scenario","stem":"Con 550 tickets al mes, ¿qué primer análisis ayuda más a detectar automatizaciones?","options":[{"id":"A","text":"Eliminar todos los tickets cerrados del historial."},{"id":"B","text":"Asignar prioridad usando solo el día de la semana."},{"id":"C","text":"Contratar inmediatamente cinco agentes autónomos."},{"id":"D","text":"Clasificarlos por tipo, frecuencia, esfuerzo, resolución, riesgo y tasa de reapertura."}],"correct_option_id":"D","explanation":"La taxonomía y baseline permiten descubrir patrones reales y quick wins.","tags":["ticket-analysis","roadmap"],"locale":"es-UY","version":1},{"id":"IT-005","module_id":"IT","difficulty":"advanced","kind":"scenario","stem":"Un chatbot marca casos como resueltos, pero los usuarios crean otro ticket al día siguiente. ¿Qué riesgo aparece?","options":[{"id":"A","text":"Mejora automática de satisfacción."},{"id":"B","text":"Desaparición de los SLAs."},{"id":"C","text":"Deflexión aparente y aumento de reopens/contactos repetidos."},{"id":"D","text":"Reducción comprobada del costo total."}],"correct_option_id":"C","explanation":"El éxito debe verificarse más allá de cerrar chats o tickets.","tags":["deflection","reopen"],"locale":"es-UY","version":1},{"id":"IT-006","module_id":"IT","difficulty":"intermediate","kind":"scenario","stem":"Un empleado solicita acceso a un recurso corporativo. ¿Qué tipo de proceso suele representar?","options":[{"id":"A","text":"Siempre root cause analysis."},{"id":"B","text":"Exclusivamente un cambio de arquitectura de datos."},{"id":"C","text":"Siempre un incidente de disponibilidad."},{"id":"D","text":"Service request, con aprobación y provisioning según políticas."}],"correct_option_id":"D","explanation":"Las solicitudes estándar se distinguen de incidentes y problemas.","tags":["service-request"],"locale":"es-UY","version":1},{"id":"IT-007","module_id":"IT","difficulty":"advanced","kind":"scenario","stem":"¿Qué integración inicial minimiza riesgo al introducir un agente en un sistema ITSM?","options":[{"id":"A","text":"Eliminar controles manuales de cambio."},{"id":"B","text":"Migrar todas las incidencias a un sistema nuevo de inmediato."},{"id":"C","text":"Acceso de lectura y recomendaciones sin cerrar ni modificar tickets."},{"id":"D","text":"Permisos de administrador para escribir en todas las colas."}],"correct_option_id":"C","explanation":"Un piloto read-only permite evaluar clasificación y asistencia antes de habilitar escritura.","tags":["rollout","security"],"locale":"es-UY","version":1},{"id":"IT-008","module_id":"IT","difficulty":"intermediate","kind":"concept","stem":"¿Cómo detectar tickets duplicados de manera más robusta?","options":[{"id":"A","text":"Combinar similitud semántica, identificadores exactos, contexto y revisión de falsos positivos."},{"id":"B","text":"Confiar únicamente en la primera palabra del mensaje."},{"id":"C","text":"Eliminar automáticamente todos los tickets del mismo cliente."},{"id":"D","text":"Comparar solo el número de caracteres del título."}],"correct_option_id":"A","explanation":"El matching debe considerar contexto de incidente y evitar fusionar casos distintos.","tags":["duplicates","classification"],"locale":"es-UY","version":1},{"id":"RC-001","module_id":"RC","difficulty":"basic","kind":"concept","stem":"¿Cuál es la diferencia entre síntoma y causa raíz?","options":[{"id":"A","text":"El síntoma es el efecto observado; la causa raíz explica el fallo subyacente."},{"id":"B","text":"La causa raíz solo se determina con la opinión del chatbot."},{"id":"C","text":"El síntoma siempre es la causa raíz."},{"id":"D","text":"Los logs son la causa raíz por definición."}],"correct_option_id":"A","explanation":"Una caída de una pantalla puede ser síntoma de fallas en una dependencia o despliegue.","tags":["rca","fundamentals"],"locale":"es-UY","version":1},{"id":"RC-002","module_id":"RC","difficulty":"intermediate","kind":"scenario","stem":"Un error aumenta tras un deployment. ¿Qué afirmación está mejor fundamentada inicialmente?","options":[{"id":"A","text":"Existe correlación temporal; hay que contrastar hipótesis con más evidencia."},{"id":"B","text":"No hace falta consultar logs si hay correlación."},{"id":"C","text":"El deploy es sin duda la causa raíz."},{"id":"D","text":"El modelo de IA está defectuoso por definición."}],"correct_option_id":"A","explanation":"Correlación temporal orienta la investigación pero no constituye causalidad probada.","tags":["correlation","hypothesis"],"locale":"es-UY","version":1},{"id":"RC-003","module_id":"RC","difficulty":"intermediate","kind":"concept","stem":"¿Para qué sirve un correlation ID en una investigación distribuida?","options":[{"id":"A","text":"Reemplazar autorización de APIs."},{"id":"B","text":"Vincular eventos y trazas de una misma solicitud a través de servicios."},{"id":"C","text":"Generar automáticamente correcciones de código."},{"id":"D","text":"Imponer SLA fijo a todos los tickets."}],"correct_option_id":"B","explanation":"Permite reconstruir la trayectoria de una solicitud, correlacionando observaciones.","tags":["tracing"],"locale":"es-UY","version":1},{"id":"RC-004","module_id":"RC","difficulty":"advanced","kind":"concept","stem":"¿Qué estructura de respuesta esperás de un RCA Agent bien diseñado?","options":[{"id":"A","text":"Una lista de herramientas invocadas sin interpretación."},{"id":"B","text":"Solo una métrica de satisfacción del chatbot."},{"id":"C","text":"Hipótesis, evidencia a favor/en contra, incertidumbre, pruebas sugeridas y mitigación."},{"id":"D","text":"Una causa definitiva sin evidencias."}],"correct_option_id":"C","explanation":"Las hipótesis refutables y su evidencia reducen diagnósticos infundados.","tags":["rca","explainability"],"locale":"es-UY","version":1},{"id":"RC-005","module_id":"RC","difficulty":"basic","kind":"concept","stem":"¿Qué significa MTTR en operaciones de soporte?","options":[{"id":"A","text":"Número de incidentes por semana."},{"id":"B","text":"Tiempo total invertido en entrenar un modelo."},{"id":"C","text":"Tiempo promedio para restaurar/resolver un incidente, según la definición adoptada."},{"id":"D","text":"Promedio de tokens por respuesta."}],"correct_option_id":"C","explanation":"MTTR debe medirse con puntos de inicio y fin explícitos.","tags":["mttr","kpi"],"locale":"es-UY","version":1},{"id":"RC-006","module_id":"RC","difficulty":"intermediate","kind":"scenario","stem":"¿Qué debería hacer primero un agente antes de ejecutar un reinicio de servicio productivo?","options":[{"id":"A","text":"Evaluar impacto, permisos, runbook, condiciones, aprobación y plan de rollback."},{"id":"B","text":"Ejecutar el reinicio porque la acción es reversible en teoría."},{"id":"C","text":"Cerrar el incidente y luego analizarlo."},{"id":"D","text":"Borrar logs para ahorrar almacenamiento."}],"correct_option_id":"A","explanation":"La remediación automatizada requiere control de cambios y análisis de blast radius.","tags":["runbook","hitl"],"locale":"es-UY","version":1},{"id":"RC-007","module_id":"RC","difficulty":"advanced","kind":"concept","stem":"¿Cómo distinguir una mitigación de una solución definitiva?","options":[{"id":"A","text":"Son sinónimos perfectos."},{"id":"B","text":"Mitigación restaura servicio; solución definitiva elimina causa subyacente cuando se valida."},{"id":"C","text":"Solución definitiva es solo reducir número de alertas."},{"id":"D","text":"Mitigación significa que no hacen falta postmortems."}],"correct_option_id":"B","explanation":"Un rollback puede mitigar mientras se investiga la causa raíz y la prevención.","tags":["mitigation","problem-management"],"locale":"es-UY","version":1},{"id":"RC-008","module_id":"RC","difficulty":"intermediate","kind":"concept","stem":"¿Qué práctica posterior a un incidente favorece aprendizaje sistémico?","options":[{"id":"A","text":"Postmortem sin culpabilización con evidencias, factores y acciones verificables."},{"id":"B","text":"Eliminar incidentes del historial para mejorar KPIs."},{"id":"C","text":"Deshabilitar trazas porque consumen recursos."},{"id":"D","text":"Asignar culpa sin datos ni revisión."}],"correct_option_id":"A","explanation":"Los postmortems deben conducir a cambios preventivos medibles y compartidos.","tags":["postmortem","sre"],"locale":"es-UY","version":1},{"id":"BI-001","module_id":"BI","difficulty":"basic","kind":"calculation","stem":"En una evaluación de automatización, ¿qué representa horas liberadas?","options":[{"id":"A","text":"Una reducción garantizada de personal."},{"id":"B","text":"Dinero efectivo ahorrado sin cambios en operación."},{"id":"C","text":"Beneficio neto después de impuestos."},{"id":"D","text":"Capacidad de trabajo potencialmente disponible, no necesariamente ahorro financiero realizado."}],"correct_option_id":"D","explanation":"Una hora liberada puede convertirse en capacidad, calidad o ahorro, pero requiere validación.","tags":["roi","capacity"],"locale":"es-UY","version":1},{"id":"BI-002","module_id":"BI","difficulty":"intermediate","kind":"scenario","stem":"Con 550 tickets mensuales y 40% de automatización, ¿cuántos tickets se automatizarían?","options":[{"id":"A","text":"400 tickets."},{"id":"B","text":"330 tickets."},{"id":"C","text":"220 tickets."},{"id":"D","text":"110 tickets."}],"correct_option_id":"C","explanation":"550 * 0,40 = 220 tickets mensuales, siempre que la tasa represente resolución automatizada válida.","tags":["calculation","tickets"],"locale":"es-UY","version":1},{"id":"BI-003","module_id":"BI","difficulty":"intermediate","kind":"calculation","stem":"Si 220 tickets ahorran 20 minutos cada uno, ¿cuántas horas mensuales libera el flujo?","options":[{"id":"A","text":"110 horas."},{"id":"B","text":"Aproximadamente 73,3 horas."},{"id":"C","text":"Aproximadamente 7,3 horas."},{"id":"D","text":"220 horas."}],"correct_option_id":"B","explanation":"220 * 20 / 60 = 73,33 horas mensuales.","tags":["calculation","time"],"locale":"es-UY","version":1},{"id":"BI-004","module_id":"BI","difficulty":"advanced","kind":"calculation","stem":"Si se liberan 73,33 h/mes a USD 35/h, ¿cuál es el valor anual aproximado de capacidad?","options":[{"id":"A","text":"USD 2.567."},{"id":"B","text":"USD 73.330."},{"id":"C","text":"USD 7.700."},{"id":"D","text":"USD 30.800."}],"correct_option_id":"D","explanation":"73,33 * 35 * 12 ≈ 30.800 USD/año antes de costos y sin equivaler a ahorro realizado.","tags":["calculation","capacity"],"locale":"es-UY","version":1},{"id":"BI-005","module_id":"BI","difficulty":"intermediate","kind":"calculation","stem":"¿Cuál fórmula expresa correctamente un ROI porcentual simple?","options":[{"id":"A","text":"(Beneficio neto / costo total de la inversión) * 100."},{"id":"B","text":"(Tickets nuevos + reopens) / 12."},{"id":"C","text":"(Costo de prompts / número de agentes) * 100."},{"id":"D","text":"(Chats abiertos / usuarios) * 100."}],"correct_option_id":"A","explanation":"La definición de beneficio neto y costo debe ser consistente y evitar doble conteo.","tags":["roi","formula"],"locale":"es-UY","version":1},{"id":"BI-006","module_id":"BI","difficulty":"advanced","kind":"scenario","stem":"Un piloto reduce tiempo por ticket, pero aumenta reopens por resoluciones incompletas. ¿Qué corresponde?","options":[{"id":"A","text":"Incorporar calidad y retrabajo al beneficio neto y revisar la automatización."},{"id":"B","text":"Cerrar los reopens automáticamente para mejorar la tasa."},{"id":"C","text":"Informar solo el tiempo ahorrado para mantener el ROI."},{"id":"D","text":"Asumir que más tickets cerrados significa más productividad."}],"correct_option_id":"A","explanation":"La automatización debe optimizar resultados reales, no solo métricas de velocidad.","tags":["quality","reopens"],"locale":"es-UY","version":1},{"id":"BI-007","module_id":"BI","difficulty":"advanced","kind":"calculation","stem":"¿Qué experimento es más útil para atribuir una mejora al agente?","options":[{"id":"A","text":"Comparar cohortes equivalentes con baseline y control, midiendo calidad y tiempos."},{"id":"B","text":"Medir el número de prompts de entrenamiento."},{"id":"C","text":"Usar solo comentarios positivos del equipo."},{"id":"D","text":"Comparar meses sin corregir estacionalidad ni composición de casos."}],"correct_option_id":"A","explanation":"La atribución requiere controlar diferencias de carga, complejidad y periodo.","tags":["ab-test","measurement"],"locale":"es-UY","version":1},{"id":"BI-008","module_id":"BI","difficulty":"intermediate","kind":"calculation","stem":"¿Qué tipo de ticket debería priorizar el primer piloto de automatización?","options":[{"id":"A","text":"Alto volumen, reglas claras, bajo riesgo y resolución verificable."},{"id":"B","text":"El caso técnicamente más espectacular sin evidencia de beneficio."},{"id":"C","text":"Cualquier ticket que requiera privilegios administrativos globales."},{"id":"D","text":"Baja frecuencia, alto riesgo y acción irreversible."}],"correct_option_id":"A","explanation":"Quick wins equilibran valor, factibilidad, seguridad y medición.","tags":["prioritization","quick-wins"],"locale":"es-UY","version":1},{"id":"OP-001","module_id":"OP","difficulty":"basic","kind":"concept","stem":"¿Qué es un golden set para evaluar agentes de soporte?","options":[{"id":"A","text":"Un panel que mide únicamente visitas al chatbot."},{"id":"B","text":"Un modelo que responde correctamente a todo."},{"id":"C","text":"Una lista aleatoria de URLs sin etiquetas."},{"id":"D","text":"Conjunto representativo y versionado de casos con resultados/evidencias esperadas."}],"correct_option_id":"D","explanation":"Los conjuntos etiquetados permiten evaluar regresiones y calidad por categoría.","tags":["evals","golden-set"],"locale":"es-UY","version":1},{"id":"OP-002","module_id":"OP","difficulty":"intermediate","kind":"concept","stem":"¿Qué mide tool-call accuracy?","options":[{"id":"A","text":"Si se eligieron herramientas y argumentos adecuados para la tarea."},{"id":"B","text":"El porcentaje de documentos que no tienen autor."},{"id":"C","text":"La calidad del diseño visual de React."},{"id":"D","text":"La cantidad total de líneas de código."}],"correct_option_id":"A","explanation":"Una acción equivocada puede ser grave incluso con respuesta conversacional convincente.","tags":["evals","tools"],"locale":"es-UY","version":1},{"id":"OP-003","module_id":"OP","difficulty":"intermediate","kind":"concept","stem":"¿Qué información conviene registrar en cada ejecución de agente?","options":[{"id":"A","text":"Solo la respuesta final, sin correlación."},{"id":"B","text":"Pensamientos internos privados del modelo como requisito de producto."},{"id":"C","text":"ID de sesión, versión, pasos, herramientas, latencia, costos y resultado con datos protegidos."},{"id":"D","text":"Todos los secretos enviados a herramientas en texto plano."}],"correct_option_id":"C","explanation":"Observabilidad operacional requiere trazas correlacionables sin exponer datos sensibles.","tags":["observability","tracing"],"locale":"es-UY","version":1},{"id":"OP-004","module_id":"OP","difficulty":"advanced","kind":"scenario","stem":"Se actualiza un prompt y cae la tasa de resolución real. ¿Cuál es una defensa apropiada?","options":[{"id":"A","text":"Actualizar todos los agentes de una sola vez sin tests."},{"id":"B","text":"Duplicar tokens hasta recuperar la puntuación."},{"id":"C","text":"Evals regresivos, feature flags, despliegue gradual y rollback."},{"id":"D","text":"Eliminar el dataset viejo para que no detecte regresiones."}],"correct_option_id":"C","explanation":"Versionado y canary reducen el riesgo al modificar prompts y modelos.","tags":["ci-cd","regression"],"locale":"es-UY","version":1},{"id":"OP-005","module_id":"OP","difficulty":"basic","kind":"concept","stem":"¿Qué representa p95 de latencia?","options":[{"id":"A","text":"Tiempo por debajo del cual cae aproximadamente el 95% de las observaciones."},{"id":"B","text":"El porcentaje de respuestas correctas."},{"id":"C","text":"La latencia máxima histórica."},{"id":"D","text":"La media exacta de todas las latencias."}],"correct_option_id":"A","explanation":"Los percentiles reflejan la experiencia de cola mejor que el promedio aislado.","tags":["latency","p95"],"locale":"es-UY","version":1},{"id":"OP-006","module_id":"OP","difficulty":"advanced","kind":"concept","stem":"Una evaluación offline tiene 95% de exactitud y producción no mejora. ¿Qué falta evaluar?","options":[{"id":"A","text":"Bajar el tamaño de todas las fuentes de texto."},{"id":"B","text":"Solo más preguntas sobre definiciones básicas."},{"id":"C","text":"Un diseño de botones más colorido."},{"id":"D","text":"Resultados end-to-end, distribution shift, escalaciones, reopens y éxito de tarea."}],"correct_option_id":"D","explanation":"La calidad de respuesta no garantiza automatización funcional ni impacto de negocio.","tags":["production","measurement"],"locale":"es-UY","version":1},{"id":"OP-007","module_id":"OP","difficulty":"intermediate","kind":"concept","stem":"¿Qué es groundedness en evaluación de respuestas?","options":[{"id":"A","text":"Frecuencia con que el agente invoca la misma función."},{"id":"B","text":"Tamaño del contexto expresado en tokens."},{"id":"C","text":"Grado en que las afirmaciones se apoyan en evidencias proporcionadas."},{"id":"D","text":"Cantidad de clics del usuario por sesión."}],"correct_option_id":"C","explanation":"Una respuesta puede ser fluida pero no sustentada por las fuentes.","tags":["groundedness","evals"],"locale":"es-UY","version":1},{"id":"OP-008","module_id":"OP","difficulty":"advanced","kind":"concept","stem":"¿Qué señal amerita un circuit breaker para herramientas de remediación?","options":[{"id":"A","text":"Que el prompt tenga menos de cien palabras."},{"id":"B","text":"Que la pantalla tenga modo oscuro."},{"id":"C","text":"Errores repetidos, efectos inesperados o exceso de presupuesto/tiempo."},{"id":"D","text":"Que una pregunta del quiz sea demasiado fácil."}],"correct_option_id":"C","explanation":"Los circuit breakers frenan cascadas de fallos y acciones inseguras.","tags":["circuit-breaker","reliability"],"locale":"es-UY","version":1},{"id":"SE-001","module_id":"SE","difficulty":"basic","kind":"scenario","stem":"¿Qué significa least privilege para un agente?","options":[{"id":"A","text":"Eliminar registros de auditoría."},{"id":"B","text":"Compartir una identidad con todos los brokers."},{"id":"C","text":"Asignarle solo permisos necesarios para sus tareas autorizadas."},{"id":"D","text":"Dar acceso de administrador y confiar en el prompt."}],"correct_option_id":"C","explanation":"Los permisos mínimos limitan daño por errores o abuso de herramientas.","tags":["least-privilege","rbac"],"locale":"es-UY","version":1},{"id":"SE-002","module_id":"SE","difficulty":"intermediate","kind":"security","stem":"¿Qué es prompt injection indirecta?","options":[{"id":"A","text":"Un filtro de color aplicado a respuestas."},{"id":"B","text":"Una solicitud legítima del operador autenticado."},{"id":"C","text":"Instrucciones maliciosas incluidas en documentos o resultados de herramientas que el modelo consume."},{"id":"D","text":"Una manera de comprimir embeddings."}],"correct_option_id":"C","explanation":"Fuentes externas no confiables no deben poder alterar políticas del agente.","tags":["prompt-injection","rag"],"locale":"es-UY","version":1},{"id":"SE-003","module_id":"SE","difficulty":"advanced","kind":"security","stem":"¿Qué capa debe imponer permisos sobre documentos de distintos clientes?","options":[{"id":"A","text":"Únicamente el texto del prompt del LLM."},{"id":"B","text":"La explicación mostrada al terminar el quiz."},{"id":"C","text":"El servicio de búsqueda/API con autorización del usuario y del tenant."},{"id":"D","text":"El CSS del navegador."}],"correct_option_id":"C","explanation":"El modelo no sustituye mecanismos de acceso aplicados por el sistema.","tags":["acl","multi-tenant"],"locale":"es-UY","version":1},{"id":"SE-004","module_id":"SE","difficulty":"intermediate","kind":"security","stem":"¿Qué registros necesita una acción de remediación para ser auditable?","options":[{"id":"A","text":"Solicitante, agente/versión, evidencia, herramienta, aprobación, parámetros seguros y resultado."},{"id":"B","text":"Solo una captura de pantalla sin contexto."},{"id":"C","text":"Solo el nombre del agente."},{"id":"D","text":"La contraseña del usuario guardada en el log."}],"correct_option_id":"A","explanation":"La trazabilidad debe permitir reconstruir quién autorizó qué, cuándo y con qué resultado, sin almacenar secretos.","tags":["audit","governance"],"locale":"es-UY","version":1},{"id":"SE-005","module_id":"SE","difficulty":"basic","kind":"security","stem":"¿Qué mecanismo conviene para guardar secretos de acceso a APIs en Azure?","options":[{"id":"A","text":"Variables visibles en código TypeScript distribuido al navegador."},{"id":"B","text":"Azure Key Vault y/o Managed Identity cuando aplique."},{"id":"C","text":"Archivos de tickets compartidos con el equipo."},{"id":"D","text":"Notas de release públicas."}],"correct_option_id":"B","explanation":"Los secretos no deben estar embebidos en código cliente ni documentos abiertos.","tags":["key-vault","identity"],"locale":"es-UY","version":1},{"id":"SE-006","module_id":"SE","difficulty":"advanced","kind":"scenario","stem":"Un agente encuentra información de salud de empleados durante una consulta. ¿Qué priorizar?","options":[{"id":"A","text":"Agregarla al prompt de todos los usuarios para mejorar contexto."},{"id":"B","text":"Minimización de datos, autorización, política de retención y cumplimiento aplicable."},{"id":"C","text":"Copiarla al repositorio para pruebas."},{"id":"D","text":"Compartirla entre tenants sin consentimiento."}],"correct_option_id":"B","explanation":"People Solutions puede implicar datos especialmente sensibles con controles reforzados.","tags":["pii","privacy"],"locale":"es-UY","version":1},{"id":"SE-007","module_id":"SE","difficulty":"intermediate","kind":"security","stem":"¿Qué acción es apropiada si un modelo propone un comando irreversible?","options":[{"id":"A","text":"Ocultar el comando al operador."},{"id":"B","text":"Eliminar el ticket original."},{"id":"C","text":"Detener ejecución automática y requerir proceso explícito de aprobación con análisis de impacto."},{"id":"D","text":"Ejecutarlo y confiar en el razonamiento del modelo."}],"correct_option_id":"C","explanation":"Operaciones destructivas requieren autorización y controles más estrictos.","tags":["human-approval","actions"],"locale":"es-UY","version":1},{"id":"SE-008","module_id":"SE","difficulty":"advanced","kind":"security","stem":"¿Qué riesgo específico aporta un tool connector comprometido?","options":[{"id":"A","text":"Garantiza mayor exactitud de resultados."},{"id":"B","text":"Puede suministrar datos maliciosos o ejecutar acciones más allá de la intención del usuario."},{"id":"C","text":"Solo cambia el estilo del chatbot."},{"id":"D","text":"Elimina la necesidad de auditoría."}],"correct_option_id":"B","explanation":"La cadena de suministro de herramientas necesita validación, permisos acotados y monitoreo.","tags":["supply-chain","tools"],"locale":"es-UY","version":1},{"id":"FE-001","module_id":"FE","difficulty":"basic","kind":"concept","stem":"¿Dónde debería autorizarse una operación de escritura ejecutada desde React?","options":[{"id":"A","text":"Solo mediante ocultar un botón."},{"id":"B","text":"Solo en el componente visual."},{"id":"C","text":"En el archivo CSS."},{"id":"D","text":"En el backend o servicio responsable, sin confiar solo en validaciones del navegador."}],"correct_option_id":"D","explanation":"La interfaz puede guiar permisos, pero el backend debe hacer enforcement.","tags":["react","authorization"],"locale":"es-UY","version":1},{"id":"FE-002","module_id":"FE","difficulty":"intermediate","kind":"concept","stem":"¿Qué aporta SSE al frontend de un asistente?","options":[{"id":"A","text":"Sustituye bases de datos vectoriales."},{"id":"B","text":"Elimina el coste de inferencia."},{"id":"C","text":"Proporciona en sí mismo autenticación completa."},{"id":"D","text":"Permite recibir eventos/respuestas del servidor de manera incremental."}],"correct_option_id":"D","explanation":"SSE puede implementar streaming, progreso y estados del agente sin polling constante.","tags":["sse","streaming"],"locale":"es-UY","version":1},{"id":"FE-003","module_id":"FE","difficulty":"intermediate","kind":"concept","stem":"¿Qué hace un Backend-for-Frontend (BFF) en una aplicación de soporte?","options":[{"id":"A","text":"Otorga a React acceso directo a secretos productivos."},{"id":"B","text":"Reemplaza automáticamente la necesidad de un backend."},{"id":"C","text":"Adapta APIs al frontend, centralizando validación e integración con servicios."},{"id":"D","text":"Sirve únicamente para animaciones."}],"correct_option_id":"C","explanation":"Un BFF desacopla UI de sistemas internos y facilita seguridad/observabilidad.","tags":["bff","api"],"locale":"es-UY","version":1},{"id":"FE-004","module_id":"FE","difficulty":"basic","kind":"concept","stem":"¿Cómo usar GitHub Copilot de forma adecuada en este equipo?","options":[{"id":"A","text":"Asistir código, tests y documentación con revisión humana y políticas corporativas."},{"id":"B","text":"Sustituir todas las pruebas por prompts."},{"id":"C","text":"Darle por defecto acceso a producción y aprobación de cambios."},{"id":"D","text":"Usarlo como base vectorial principal de pólizas."}],"correct_option_id":"A","explanation":"Copilot potencia la ingeniería; la responsabilidad de diseño y revisión permanece en el equipo.","tags":["copilot","devops"],"locale":"es-UY","version":1},{"id":"FE-005","module_id":"FE","difficulty":"intermediate","kind":"concept","stem":"¿Cuál es una fuente confiable para un Release Notes Agent?","options":[{"id":"A","text":"PRs fusionados, issues vinculados, changelog y despliegues efectivamente publicados."},{"id":"B","text":"Solo mensajes privados no relacionados."},{"id":"C","text":"El nombre de la rama principal sin historial."},{"id":"D","text":"Respuesta alucinada basada en la versión anterior."}],"correct_option_id":"A","explanation":"Las notas deben derivarse de cambios verificables y corresponder a la versión entregada.","tags":["release-notes"],"locale":"es-UY","version":1},{"id":"FE-006","module_id":"FE","difficulty":"advanced","kind":"concept","stem":"¿Qué riesgo hay al generar release notes directamente desde commits sin filtrado?","options":[{"id":"A","text":"Garantizar que todas las notas estén aprobadas."},{"id":"B","text":"Evitar toda necesidad de revisión editorial."},{"id":"C","text":"Incluir cambios internos, falsos positivos o funcionalidades no desplegadas."},{"id":"D","text":"Reducir a cero la exposición de datos privados."}],"correct_option_id":"C","explanation":"Los commits no son sinónimo de cambios visibles para usuarios ni de releases publicados.","tags":["release-notes","validation"],"locale":"es-UY","version":1},{"id":"FE-007","module_id":"FE","difficulty":"intermediate","kind":"concept","stem":"¿Qué buena práctica de GitHub Actions aplicaría a esta app y agentes?","options":[{"id":"A","text":"Poner tokens de producción en workflows públicos."},{"id":"B","text":"Deshabilitar code review para agilizar."},{"id":"C","text":"Ejecutar cambios directamente desde cualquier fork sin revisión."},{"id":"D","text":"CI con lint, tests, escaneo de secretos y protección de ramas antes del deploy."}],"correct_option_id":"D","explanation":"La automatización de calidad y seguridad debe respaldar el despliegue continuo.","tags":["github-actions","ci-cd"],"locale":"es-UY","version":1},{"id":"FE-008","module_id":"FE","difficulty":"advanced","kind":"concept","stem":"¿Por qué correlacionar UI, API, agente y herramienta en las trazas?","options":[{"id":"A","text":"Para que cada capa use un ID diferente sin relación."},{"id":"B","text":"Permite seguir una solicitud completa y localizar latencia, fallos y acciones."},{"id":"C","text":"Para eliminar todo logging de backend."},{"id":"D","text":"Para que el frontend tenga acceso a todas las claves."}],"correct_option_id":"B","explanation":"La observabilidad end-to-end conecta experiencia del usuario y diagnóstico técnico.","tags":["tracing","architecture"],"locale":"es-UY","version":1},{"id":"IN-001","module_id":"IN","difficulty":"basic","kind":"concept","stem":"¿Qué papel cumple generalmente un insurance broker?","options":[{"id":"A","text":"Emitir siempre la póliza como entidad aseguradora."},{"id":"B","text":"Resolver automáticamente siniestros judiciales."},{"id":"C","text":"Intermediar y asesorar en soluciones de seguro para clientes, distinto del carrier."},{"id":"D","text":"Operar solo sistemas de base de datos."}],"correct_option_id":"C","explanation":"El broker actúa como intermediario/asesor; el carrier asume el riesgo asegurado bajo la póliza.","tags":["broker","carrier"],"locale":"es-UY","version":1},{"id":"IN-002","module_id":"IN","difficulty":"basic","kind":"concept","stem":"¿Qué es una premium en seguros?","options":[{"id":"A","text":"El monto de una incidencia de Azure."},{"id":"B","text":"La cantidad de empleados del broker."},{"id":"C","text":"La prima o importe que se paga por cobertura conforme a la póliza."},{"id":"D","text":"Un identificador único de API."}],"correct_option_id":"C","explanation":"Premium refiere al precio de cobertura, sujeto a términos y condiciones.","tags":["insurance","premium"],"locale":"es-UY","version":1},{"id":"IN-003","module_id":"IN","difficulty":"intermediate","kind":"concept","stem":"¿Qué es un claim en un flujo asegurador?","options":[{"id":"A","text":"Una reclamación o solicitud de cobertura ante un evento potencialmente cubierto."},{"id":"B","text":"La fecha en que se entrena un embedding."},{"id":"C","text":"Un tipo de token en modelos generativos."},{"id":"D","text":"Una nueva rama de GitHub."}],"correct_option_id":"A","explanation":"Las reclamaciones involucran validación de hechos y términos de la póliza.","tags":["insurance","claims"],"locale":"es-UY","version":1},{"id":"IN-004","module_id":"IN","difficulty":"intermediate","kind":"concept","stem":"¿Qué dominio cubre People Solutions en términos generales?","options":[{"id":"A","text":"Beneficios y soluciones relacionadas con personas, empleados y empleadores."},{"id":"B","text":"Solo transporte marítimo de contenedores."},{"id":"C","text":"Exclusivamente ingeniería de redes industriales."},{"id":"D","text":"Un proveedor de servicios meteorológicos."}],"correct_option_id":"A","explanation":"People Solutions abarca consultoría y productos relativos a beneficios, compensación y bienestar.","tags":["people-solutions"],"locale":"es-UY","version":1},{"id":"IN-005","module_id":"IN","difficulty":"advanced","kind":"scenario","stem":"Un broker consulta si un beneficio específico está cubierto por una póliza de un cliente. ¿Qué respuesta es adecuada?","options":[{"id":"A","text":"Responder con documentos vigentes y autorizados, indicando límites, condiciones y necesidad de revisión."},{"id":"B","text":"Inventar exclusiones basadas en intuición."},{"id":"C","text":"Afirmar cobertura porque el cliente tuvo una póliza similar el año anterior."},{"id":"D","text":"Consultar documentos de otro cliente para completar detalles."}],"correct_option_id":"A","explanation":"La precisión sobre cobertura exige fuente, versión y controles de acceso.","tags":["policy","grounding"],"locale":"es-UY","version":1},{"id":"IN-006","module_id":"IN","difficulty":"basic","kind":"concept","stem":"¿Qué significa renewal en seguros?","options":[{"id":"A","text":"Renovación de una póliza o contrato de cobertura."},{"id":"B","text":"Un método de búsqueda vectorial."},{"id":"C","text":"Un pull request urgente."},{"id":"D","text":"Una alerta de latencia de servidor."}],"correct_option_id":"A","explanation":"Las renovaciones son operaciones de negocio clave y pueden generar flujos de soporte.","tags":["renewal"],"locale":"es-UY","version":1},{"id":"IN-007","module_id":"IN","difficulty":"advanced","kind":"concept","stem":"¿Qué riesgo implica automatizar decisiones finales de cobertura sin controles?","options":[{"id":"A","text":"Exclusivamente un cambio cosmético de UI."},{"id":"B","text":"Ninguno si la respuesta tiene un tono seguro."},{"id":"C","text":"Solo aumento de coste de tokens."},{"id":"D","text":"Errores comerciales o regulatorios y perjuicios a clientes por interpretación incorrecta."}],"correct_option_id":"D","explanation":"Las decisiones sensibles necesitan precisión, controles humanos y políticas aplicables.","tags":["compliance","coverage"],"locale":"es-UY","version":1},{"id":"IN-008","module_id":"IN","difficulty":"intermediate","kind":"scenario","stem":"¿Qué información es crítica antes de diseñar un Broker Assistant para Lockton?","options":[{"id":"A","text":"Número de animaciones React disponibles."},{"id":"B","text":"Solo el diseño del avatar del chatbot."},{"id":"C","text":"Productos concretos, perfiles de usuarios, límites de acceso, KB y sistemas autorizados."},{"id":"D","text":"Que el agente tenga tantos subagentes como sea posible."}],"correct_option_id":"C","explanation":"La arquitectura depende de procesos de negocio reales, derechos de acceso y calidad de fuentes.","tags":["discovery","broker"],"locale":"es-UY","version":1},{"id":"LD-001","module_id":"LD","difficulty":"basic","kind":"concept","stem":"¿Qué significa ownership para el AI Architect en un equipo de tres?","options":[{"id":"A","text":"Concentrarse solo en demos sin operación."},{"id":"B","text":"Delegar todas las decisiones a un chatbot."},{"id":"C","text":"Definir dirección técnica, decisiones, calidad y resultados junto con el equipo."},{"id":"D","text":"Escribir personalmente cada línea de código."}],"correct_option_id":"C","explanation":"Ownership combina visión, priorización, delegación y rendición de cuentas.","tags":["leadership","ownership"],"locale":"es-UY","version":1},{"id":"LD-002","module_id":"LD","difficulty":"intermediate","kind":"concept","stem":"¿Qué debería realizarse durante los primeros 30 días?","options":[{"id":"A","text":"Discovery de producto, entrevistas, baseline de tickets, inventario de stack y riesgos."},{"id":"B","text":"Prometer porcentajes de ahorro sin datos."},{"id":"C","text":"Desplegar siete agentes autónomos a producción sin conocer procesos."},{"id":"D","text":"Reescribir todas las aplicaciones en un framework nuevo."}],"correct_option_id":"A","explanation":"La fase inicial reduce incertidumbre y permite seleccionar pilotos medibles.","tags":["30-60-90","discovery"],"locale":"es-UY","version":1},{"id":"LD-003","module_id":"LD","difficulty":"intermediate","kind":"concept","stem":"¿Qué entregable es razonable para el día 60?","options":[{"id":"A","text":"Automatización irreversible de todos los incidentes."},{"id":"B","text":"Piloto evaluado de triage/KB, diseño de RCA y baseline de calidad."},{"id":"C","text":"Un framework propio de LLM sin producto en operación."},{"id":"D","text":"Eliminación completa del equipo humano."}],"correct_option_id":"B","explanation":"La entrega incremental reduce riesgo y acumula evidencia.","tags":["roadmap","pilot"],"locale":"es-UY","version":1},{"id":"LD-004","module_id":"LD","difficulty":"advanced","kind":"concept","stem":"El negocio exige siete agentes desde el comienzo. ¿Qué respuesta muestra criterio arquitectónico?","options":[{"id":"A","text":"Proponer siete capacidades, probar valor y elegir agentes o workflows según necesidad."},{"id":"B","text":"Ignorar seguridad hasta terminar la demo."},{"id":"C","text":"Crear siete LLMs aunque no tengan tareas distintas."},{"id":"D","text":"Rechazar cualquier forma de automatización."}],"correct_option_id":"A","explanation":"El objetivo es la capacidad de negocio; el número de agentes no debe ser la métrica de éxito.","tags":["agent-strategy","tradeoff"],"locale":"es-UY","version":1},{"id":"LD-005","module_id":"LD","difficulty":"intermediate","kind":"concept","stem":"¿Cómo distribuirías el trabajo entre AI Architect y dos integrantes?","options":[{"id":"A","text":"Separar equipos para impedir revisión entre pares."},{"id":"B","text":"Asignar tareas sin criterios de aceptación."},{"id":"C","text":"Arquitecto en dirección e integración; ingenieros con ownership claro de verticales y tests, revisiones cruzadas."},{"id":"D","text":"Todo trabajo crítico exclusivamente en el arquitecto."}],"correct_option_id":"C","explanation":"Roles claros y colaboración equilibran velocidad y resiliencia.","tags":["team","delivery"],"locale":"es-UY","version":1},{"id":"LD-006","module_id":"LD","difficulty":"advanced","kind":"scenario","stem":"Un stakeholder pide reemplazar el chatbot existente. ¿Qué hacés primero?","options":[{"id":"A","text":"Eliminar la KB actual."},{"id":"B","text":"Evaluar rendimiento, costos, límites, uso y posibilidad de evolución antes de decidir."},{"id":"C","text":"Reemplazarlo sin métricas porque lo nuevo siempre es mejor."},{"id":"D","text":"Asumir que el chatbot ya es un agente autónomo."}],"correct_option_id":"B","explanation":"La decisión build/buy/evolve requiere evidencia sobre producto y operación.","tags":["discovery","build-vs-buy"],"locale":"es-UY","version":1},{"id":"LD-007","module_id":"LD","difficulty":"intermediate","kind":"concept","stem":"¿Qué documento conviene para registrar por qué elegiste workflow en lugar de multi-agent?","options":[{"id":"A","text":"Una nota informal sin motivación."},{"id":"B","text":"Un release note antes de implementar."},{"id":"C","text":"Architecture Decision Record con contexto, alternativas, decisión y consecuencias."},{"id":"D","text":"Solo un screenshot del diagrama."}],"correct_option_id":"C","explanation":"Un ADR permite explicar trade-offs y revisar decisiones en el futuro.","tags":["adr","architecture"],"locale":"es-UY","version":1},{"id":"LD-008","module_id":"LD","difficulty":"advanced","kind":"concept","stem":"¿Qué mensaje ejecutivo representa mejor el éxito de AI Efficiency?","options":[{"id":"A","text":"Reducción verificable del esfuerzo y mejora de servicio con seguridad y costo total controlado."},{"id":"B","text":"Cantidad de agentes desplegados como único KPI."},{"id":"C","text":"Número de reuniones de arquitectura."},{"id":"D","text":"Cantidad de tokens consumidos durante el piloto."}],"correct_option_id":"A","explanation":"Los resultados deben reflejar valor de negocio, calidad, riesgo y sustentabilidad.","tags":["business-value","executive"],"locale":"es-UY","version":1}];
+
+const MODULES = [
+  {id:'AG',n:'M01',name:'Fundamentos de Agentic AI'},
+  {id:'OR',n:'M02',name:'Agent Engineering y orquestación'},
+  {id:'AZ',n:'M03',name:'Plataforma Microsoft Azure AI'},
+  {id:'RG',n:'M04',name:'RAG, búsqueda y base de conocimiento'},
+  {id:'IT',n:'M05',name:'ITSM y automatización de tickets'},
+  {id:'RC',n:'M06',name:'RCA, SRE y confiabilidad'},
+  {id:'BI',n:'M07',name:'AI Efficiency, KPIs y business cases'},
+  {id:'OP',n:'M08',name:'LLMOps / AgentOps / Evaluaciones'},
+  {id:'SE',n:'M09',name:'Seguridad, gobierno y cumplimiento'},
+  {id:'FE',n:'M10',name:'Frontend React, GitHub Copilot y dev'},
+  {id:'IN',n:'M11',name:'Contexto Lockton y negocio asegurador'},
+  {id:'LD',n:'M12',name:'Liderazgo, producto y delivery'}
+];
+const MOD = Object.fromEntries(MODULES.map(m=>[m.id,m]));
+const DIFF = {basic:'Básica',intermediate:'Intermedia',advanced:'Avanzada'};
+const KIND = {concept:'Concepto',scenario:'Escenario',architecture:'Arquitectura',security:'Seguridad',calculation:'Cálculo'};
+const LETTERS = 'ABCD';
+const DAY = 864e5;
+const SRS_DAYS = [1,3,7,14,30];
+const KEY = 'ai-architect-quiz-v1';
+
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle = a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const uid = ()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const pct = (a,b)=>b?Math.round(a/b*100):0;
+const fmtTime = ms=>{ms=Math.max(0,ms);const s=Math.round(ms/1000),m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');};
+const fmtDate = t=>new Date(t).toLocaleDateString('es-UY',{day:'2-digit',month:'short'})+' '+new Date(t).toLocaleTimeString('es-UY',{hour:'2-digit',minute:'2-digit'});
+const say = t=>{const l=$('#live');l.textContent='';setTimeout(()=>{l.textContent=t;},30);};
+
+/* ---------- bank validation (sección 7.3) ---------- */
+const issues = [];
+(function validate(){
+  const seen = new Set();
+  for(const q of BANK){
+    const bad = m=>issues.push(q.id+': '+m);
+    if(seen.has(q.id)) bad('ID duplicado'); seen.add(q.id);
+    if(!/^[A-Z]{2}-\d{3}$/.test(q.id)) bad('formato de ID inválido');
+    if(!MOD[q.module_id]) bad('módulo desconocido');
+    if(!Array.isArray(q.options)||q.options.length!==4){bad('no tiene 4 opciones');continue;}
+    if(new Set(q.options.map(o=>String(o.text).trim().toLowerCase())).size!==4) bad('opciones repetidas');
+    if(new Set(q.options.map(o=>o.id)).size!==4) bad('IDs de opción repetidos');
+    if(!q.options.some(o=>o.id===q.correct_option_id)) bad('la clave no coincide con ninguna opción');
+    if(!q.explanation) bad('sin explicación');
+  }
+})();
+const badIds = new Set(issues.map(i=>i.split(':')[0]));
+const Q = BANK.filter(q=>!badIds.has(q.id));
+const QI = Object.fromEntries(Q.map(q=>[q.id,q]));
+
+/* ---------- persistence ---------- */
+const fresh = ()=>({v:1,attempts:[],review:{},fav:[],session:null,history:[],settings:{pass:80}});
+let P = fresh();
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d&&d.v===1)P=Object.assign(fresh(),d);}}catch(e){}
+const save = ()=>{try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}};
+
+/* ---------- learning model ---------- */
+function srs(qid,ok){
+  const r = P.review[qid]||{cc:0,n:0};
+  r.n=(r.n||0)+1;
+  if(ok){r.cc=(r.cc||0)+1;r.due=Date.now()+SRS_DAYS[Math.min(r.cc,4)]*DAY;}
+  else{r.cc=0;r.due=Date.now()+DAY;}
+  r.last=ok; P.review[qid]=r;
+}
+function record(item,sid){
+  const q=QI[item.q]; const ok=item.ch===q.correct_option_id;
+  item.ok=ok; item.done=true;
+  P.attempts.push({q:item.q,ch:item.ch,c:ok,ms:Math.round(item.ms||0),t:Date.now(),s:sid,ver:q.version});
+  srs(item.q,ok);
+}
+function moduleStats(mid){
+  const qs=Q.filter(q=>q.module_id===mid); let seen=0,ok=0;
+  for(const q of qs){const r=P.review[q.id];if(r){seen++;if(r.last)ok++;}}
+  const need=Math.min(8,qs.length); const p=pct(ok,seen);
+  let lv,cls;
+  if(seen<need){lv='Muestra insuficiente';cls='lv-none';}
+  else if(p>=90){lv='Sólido';cls='lv-solid';}
+  else if(p>=80){lv='Competente';cls='lv-comp';}
+  else if(p>=60){lv='En progreso';cls='lv-prog';}
+  else{lv='Novato';cls='lv-nov';}
+  return {total:qs.length,seen,ok,p,lv,cls,need};
+}
+function globalStats(){
+  const first=new Map(); for(const a of P.attempts) if(!first.has(a.q)) first.set(a.q,a.c);
+  const firstOk=[...first.values()].filter(Boolean).length;
+  const recent=P.attempts.slice(-40); const recentOk=recent.filter(a=>a.c).length;
+  const days=new Set(P.attempts.map(a=>new Date(a.t).toDateString()));
+  let streak=0; const d=new Date();
+  if(!days.has(d.toDateString())) d.setDate(d.getDate()-1);
+  while(days.has(d.toDateString())){streak++;d.setDate(d.getDate()-1);}
+  return {unique:first.size,firstAcc:first.size?pct(firstOk,first.size):null,recentAcc:recent.length?pct(recentOk,recent.length):null,attempts:P.attempts.length,streak};
+}
+const dueList = ()=>{const now=Date.now();return Q.filter(q=>P.review[q.id]&&P.review[q.id].due<=now);};
+const wrongList = ()=>Q.filter(q=>P.review[q.id]&&P.review[q.id].last===false);
+const favList = ()=>Q.filter(q=>P.fav.includes(q.id));
+
+/* ---------- sessions ---------- */
+function makeSession(mode,qs,opts){
+  P.session={
+    id:uid(),mode,label:opts.label,fb:opts.fb||'immediate',
+    items:qs.map(q=>({q:q.id,o:shuffle(q.options.map(o=>o.id)),ch:null,done:false,ok:null,ms:0})),
+    idx:0,started:Date.now(),limit:opts.limit||0,pass:opts.pass||P.settings.pass,finished:false
+  };
+  save(); go('quiz');
+}
+function pickPractice(pool,count){
+  const now=Date.now();
+  const due=shuffle(pool.filter(q=>P.review[q.id]&&P.review[q.id].due<=now));
+  const unseen=shuffle(pool.filter(q=>!P.review[q.id]));
+  const rest=shuffle(pool.filter(q=>P.review[q.id]&&P.review[q.id].due>now));
+  return [...due,...unseen,...rest].slice(0,count);
+}
+function pickExam(count){
+  const pools=shuffle(MODULES.map(m=>shuffle(Q.filter(q=>q.module_id===m.id))));
+  const out=[]; let i=0;
+  while(out.length<count&&pools.some(p=>p.length)){const p=pools[i%pools.length];if(p.length)out.push(p.shift());i++;}
+  return shuffle(out);
+}
+function summarize(S){
+  const exam=S.mode==='exam';
+  const base=exam?S.items:S.items.filter(i=>i.done);
+  const correct=S.items.filter(i=>i.ok).length;
+  const answered=S.items.filter(i=>i.ch).length;
+  const group=key=>{const m={};for(const it of base){const q=QI[it.q];const k=key(q);m[k]=m[k]||{ok:0,n:0};m[k].n++;if(it.ok)m[k].ok++;}return m;};
+  return {total:S.items.length,answered,correct,score:pct(correct,base.length),base:base.length,
+    byMod:group(q=>q.module_id),byDiff:group(q=>q.difficulty),byKind:group(q=>q.kind),
+    elapsed:(S.finishedAt||Date.now())-S.started};
+}
+function finish(){
+  const S=P.session; if(!S||S.finished) return;
+  tickTime();
+  for(const it of S.items) if(it.ch&&!it.done) record(it,S.id);
+  S.finished=true; S.finishedAt=Date.now();
+  const sm=summarize(S);
+  P.history.unshift({id:S.id,mode:S.mode,label:S.label,t:S.finishedAt,score:sm.score,correct:sm.correct,total:sm.total,pass:S.mode==='exam'?sm.score>=S.pass:null});
+  P.history=P.history.slice(0,30);
+  save(); go('resultados');
+}
+
+/* ---------- router ---------- */
+const ROUTES=['inicio','practica','examen','repaso','simulador','entrevista','quiz','resultados'];
+const route=()=>{const r=(location.hash||'').slice(1);return ROUTES.includes(r)?r:'inicio';};
+function go(r){if(location.hash!=='#'+r)location.hash=r;else render();}
+window.addEventListener('hashchange',render);
+let shownAt=0;
+function tickTime(){const S=P.session;if(S&&!S.finished&&shownAt){const it=S.items[S.idx];if(it&&!(S.fb==='immediate'&&it.done))it.ms+=performance.now()-shownAt;}shownAt=performance.now();}
+
+function render(){
+  const r=route(); const app=$('#app');
+  $$('nav.tabs a').forEach(a=>{const on=a.dataset.r===r||(r==='quiz'||r==='resultados')&&a.dataset.r===(P.session&&P.session.mode==='exam'?'examen':P.session&&P.session.mode==='review'?'repaso':'practica');a.toggleAttribute('aria-current',on);if(on)a.setAttribute('aria-current','page');});
+  const views={inicio:vHome,practica:vPractice,examen:vExam,repaso:vReview,simulador:vSim,entrevista:vInterview,quiz:vQuiz,resultados:vResults};
+  if(r!=='quiz') shownAt=0;
+  app.innerHTML=views[r]();
+  bind[r]&&bind[r]();
+  if(r!=='quiz') window.scrollTo(0,0);
+}
+
+/* ---------- views ---------- */
+function resumeBanner(){
+  const S=P.session; if(!S||S.finished) return '';
+  const done=S.items.filter(i=>i.ch).length;
+  return `<div class="banner"><p><strong>Sesión en curso:</strong> ${esc(S.label)} · ${done}/${S.items.length} respondidas</p>
+    <button class="btn sm" data-act="resume">Continuar</button><button class="btn ghost sm" data-act="discard">Descartar</button></div>`;
+}
+function vHome(){
+  const g=globalStats(); const due=dueList().length;
+  const mods=MODULES.map(m=>{const s=moduleStats(m.id);
+    return `<button class="mod" data-mod="${m.id}" aria-label="Practicar ${esc(m.name)}">
+      <div class="h"><div><div class="code">${m.n} · ${m.id}</div><div class="name">${esc(m.name)}</div></div><span class="pill ${s.cls}">${s.lv}</span></div>
+      <div class="meter" aria-hidden="true"><i class="ok" style="width:${s.ok/s.total*100}%"></i><i class="bad" style="width:${(s.seen-s.ok)/s.total*100}%"></i></div>
+      <div class="foot"><span>${s.seen}/${s.total} vistas</span><span>${s.seen?s.p+'% acierto':'sin intentos'}</span></div></button>`;}).join('');
+  const hist=P.history.slice(0,6).map(h=>`<div><span class="mono muted">${fmtDate(h.t)}</span><span style="flex:1;min-width:0">${esc(h.label)}</span><span class="mono">${h.correct}/${h.total}</span><strong class="mono">${h.score}%</strong>${h.pass===null?'':`<span class="pill ${h.pass?'pass':'fail'}">${h.pass?'Aprobado':'No aprobado'}</span>`}</div>`).join('');
+  return `
+  ${resumeBanner()}
+  <section>
+    <div class="eyebrow">Preparación de entrevista · AI Architect</div>
+    <h1>Agentes, Azure AI, ITSM y eficiencia operativa</h1>
+    <p class="lede">Practicá por módulo con explicación inmediata, simulá un examen cronometrado o repasá tus errores con repetición espaciada. El progreso queda guardado en este navegador.</p>
+    <div class="row">
+      <button class="btn" data-act="quick">Práctica rápida · 10</button>
+      <a class="btn ghost" href="#examen">Examen simulado</a>
+      <button class="btn ghost" data-act="due" ${due?'':'disabled'}>Repasar pendientes (${due})</button>
+    </div>
+  </section>
+  <section aria-label="Tu progreso">
+    <div class="stats">
+      <div class="stat"><b>${g.unique}<small class="muted" style="font-size:.9rem">/${Q.length}</small></b><span>Preguntas vistas</span></div>
+      <div class="stat"><b>${g.firstAcc==null?'—':g.firstAcc+'%'}</b><span>Acierto al primer intento</span></div>
+      <div class="stat"><b>${g.recentAcc==null?'—':g.recentAcc+'%'}</b><span>Acierto reciente (40)</span></div>
+      <div class="stat"><b>${due}</b><span>Repasos pendientes</span></div>
+      <div class="stat"><b>${g.streak} ${g.streak===1?'día':'días'}</b><span>Racha de estudio</span></div>
+    </div>
+  </section>
+  <section>
+    <div class="row"><h2>Módulos</h2><span class="spacer"></span><span class="muted" style="font-size:.84rem">Dominio con 8 preguntas únicas: &lt;60 novato · 60–79 en progreso · 80–89 competente · ≥90 sólido</span></div>
+    <div class="mods">${mods}</div>
+  </section>
+  ${hist?`<section><h2>Sesiones recientes</h2><div class="hist">${hist}</div></section>`:''}
+  <section>
+    <h2>Datos</h2>
+    <details><summary>Exportar, importar o reiniciar progreso</summary><div class="body">
+      <p class="muted" style="font-size:.88rem">El progreso se guarda solo en este navegador. Copiá el JSON para respaldarlo o moverlo a otro dispositivo.</p>
+      <div class="row"><button class="btn ghost sm" data-act="export">Mostrar JSON de progreso</button><button class="btn ghost sm" data-act="copy">Copiar</button><button class="btn ghost sm" data-act="download">Descargar .json</button></div>
+      <label class="field" for="io">Progreso (JSON)<textarea id="io" spellcheck="false" placeholder="Pegá aquí un JSON exportado y presioná Importar"></textarea></label>
+      <div class="row"><button class="btn sm" data-act="import">Importar</button><button class="btn danger sm" data-act="reset">Borrar todo el progreso</button><span id="iomsg" class="muted" style="font-size:.84rem"></span></div>
+    </div></details>
+  </section>`;
+}
+
+let preMods=null;
+function vPractice(){
+  const sel=preMods||MODULES.map(m=>m.id);
+  const modChecks=MODULES.map(m=>`<label class="choice"><input type="checkbox" name="mod" value="${m.id}" ${sel.includes(m.id)?'checked':''}><span>${m.n} ${esc(m.name)}</span></label>`).join('');
+  return `${resumeBanner()}
+  <section>
+    <div class="eyebrow">Práctica guiada</div>
+    <h1>Configurar práctica</h1>
+    <p class="lede">Se priorizan las preguntas pendientes de repaso, luego las no vistas. Las opciones se mezclan en cada sesión.</p>
+  </section>
+  <form class="panel" id="pform">
+    <fieldset><legend>Módulos</legend>
+      <div class="row"><button type="button" class="btn ghost sm" data-all="1">Todos</button><button type="button" class="btn ghost sm" data-all="0">Ninguno</button></div>
+      <div class="choices">${modChecks}</div></fieldset>
+    <fieldset><legend>Dificultad</legend><div class="choices">
+      ${Object.entries(DIFF).map(([k,v])=>`<label class="choice"><input type="checkbox" name="diff" value="${k}" checked><span>${v}</span></label>`).join('')}</div></fieldset>
+    <fieldset><legend>Cantidad</legend><div class="choices">
+      ${[5,10,20,0].map(n=>`<label class="choice"><input type="radio" name="count" value="${n}" ${n===10?'checked':''}><span>${n||'Todas'}</span></label>`).join('')}</div></fieldset>
+    <fieldset><legend>Feedback</legend><div class="choices">
+      <label class="choice"><input type="radio" name="fb" value="immediate" checked><span>Inmediato tras cada pregunta</span></label>
+      <label class="choice"><input type="radio" name="fb" value="end"><span>Al final de la sesión</span></label></div></fieldset>
+    <div class="row"><button class="btn" type="submit" id="pstart">Empezar</button><span id="pavail" class="muted"></span></div>
+  </form>`;
+}
+function vExam(){
+  return `${resumeBanner()}
+  <section>
+    <div class="eyebrow">Modo examen</div>
+    <h1>Examen simulado</h1>
+    <p class="lede">Preguntas equilibradas entre los 12 módulos, en orden aleatorio y sin explicaciones hasta finalizar. Las no respondidas cuentan como incorrectas.</p>
+  </section>
+  <form class="panel" id="eform">
+    <fieldset><legend>Preguntas</legend><div class="choices">
+      ${[30,60].map(n=>`<label class="choice"><input type="radio" name="count" value="${n}" ${n===30?'checked':''}><span>${n} preguntas</span></label>`).join('')}</div></fieldset>
+    <fieldset><legend>Tiempo límite</legend><div class="choices">
+      ${[30,60,90,0].map(n=>`<label class="choice"><input type="radio" name="time" value="${n}" ${n===30?'checked':''}><span>${n?n+' min':'Sin límite'}</span></label>`).join('')}</div></fieldset>
+    <label class="field" for="epass" style="max-width:220px">Umbral de aprobación (%)<input type="number" id="epass" min="1" max="100" value="${P.settings.pass}"></label>
+    <div class="row"><button class="btn" type="submit">Comenzar examen</button></div>
+  </form>`;
+}
+function vReview(){
+  const due=dueList(),wrong=wrongList(),fav=favList();
+  const now=Date.now(); const up=[1,3,7,30].map(d=>({d,n:Q.filter(q=>{const r=P.review[q.id];return r&&r.due>now&&r.due<=now+d*DAY;}).length}));
+  const card=(id,title,desc,list)=>`<div class="panel" style="gap:10px"><div class="row"><h3>${title}</h3><span class="spacer"></span><span class="pill">${list.length}</span></div><p class="muted" style="font-size:.88rem">${desc}</p><div class="row"><button class="btn sm" data-rev="${id}" ${list.length?'':'disabled'}>Repasar</button></div></div>`;
+  const wl=wrong.slice(0,12).map(q=>`<div><span class="mono muted">${q.id}</span><span style="flex:1;min-width:0">${esc(q.stem)}</span></div>`).join('');
+  return `${resumeBanner()}
+  <section>
+    <div class="eyebrow">Flash review · repetición espaciada</div>
+    <h1>Repaso</h1>
+    <p class="lede">Incorrecta: vuelve en 1 día. Correcta: 3, 7, 14 y 30 días según la racha de aciertos consecutivos.</p>
+  </section>
+  <div class="breakdowns">
+    ${card('due','Pendientes hoy','Preguntas cuya fecha de repaso ya llegó.',due)}
+    ${card('wrong','Errores','Preguntas cuyo último intento fue incorrecto, sin esperar la fecha.',wrong)}
+    ${card('fav','Favoritos','Preguntas que marcaste con la estrella.',fav)}
+  </div>
+  <section><h2>Próximos repasos</h2>
+    <div class="stats">${up.map(u=>`<div class="stat"><b>${u.n}</b><span>en ${u.d===1?'24 horas':u.d+' días'}</span></div>`).join('')}</div></section>
+  ${wl?`<section><h2>Últimos errores</h2><div class="hist">${wl}</div></section>`:''}`;
+}
+
+let confirmFinish=false;
+function vQuiz(){
+  const S=P.session;
+  if(!S){setTimeout(()=>go('inicio'));return '';}
+  if(S.finished){setTimeout(()=>go('resultados'));return '';}
+  const it=S.items[S.idx], q=QI[it.q], m=MOD[q.module_id];
+  const imm=S.fb==='immediate', reveal=imm&&it.done, last=S.idx===S.items.length-1;
+  const answered=S.items.filter(i=>i.ch).length;
+  const progress=imm?S.items.filter(i=>i.done).length:answered;
+  const opts=it.o.map((oid,i)=>{
+    const o=q.options.find(x=>x.id===oid); const sel=it.ch===oid; let cls='opt'+(sel?' sel':''),mark='';
+    if(reveal){ if(oid===q.correct_option_id){cls='opt right';mark='<span class="mark">✓ Correcta</span>';} else if(sel){cls='opt wrong';mark='<span class="mark">✗ Tu respuesta</span>';} else cls+=' dim'; }
+    return `<button type="button" class="${cls}" role="radio" aria-checked="${sel}" data-oi="${i}" ${reveal?'disabled':''}><span class="letter">${LETTERS[i]}</span><span class="otext">${esc(o.text)}</span>${mark}</button>`;
+  }).join('');
+  const correctIdx=it.o.indexOf(q.correct_option_id);
+  const fav=P.fav.includes(q.id);
+  let actions;
+  if(imm){
+    actions=`<div class="row">${reveal
+      ?`<button class="btn" data-act="next">${last?'Ver resultados':'Siguiente →'}</button>`
+      :`<button class="btn" data-act="confirm" ${it.ch?'':'disabled'}>Confirmar respuesta</button>`}
+      <span class="spacer"></span><button class="btn ghost sm" data-act="end">Terminar sesión</button></div>`;
+  }else{
+    actions=`<div class="row"><button class="btn ghost" data-act="prev" ${S.idx?'':'disabled'}>← Anterior</button>
+      <button class="btn ${last?'ghost':''}" data-act="next" ${last?'disabled':''}>Siguiente →</button>
+      <span class="spacer"></span><button class="btn ${last?'':'ghost'}" data-act="end">Finalizar${S.mode==='exam'?' examen':''}</button></div>
+      ${confirmFinish?`<div class="confirm" role="alert"><p>Quedan ${S.items.length-answered} sin responder. Cuentan como incorrectas.</p><button class="btn sm" data-act="endyes">Finalizar igual</button><button class="btn ghost sm" data-act="endno">Seguir respondiendo</button></div>`:''}
+      <div class="dots" aria-label="Navegador de preguntas">${S.items.map((x,i)=>`<button class="dot ${x.ch?'ans':''} ${i===S.idx?'cur':''}" data-go="${i}" aria-label="Pregunta ${i+1}${x.ch?', respondida':''}">${i+1}</button>`).join('')}</div>`;
+  }
+  return `<section class="quiz">
+    <div class="qtop"><div><span class="mono">Pregunta ${S.idx+1}/${S.items.length}</span> <span class="muted">· ${esc(S.label)}</span></div>
+      ${S.limit?`<div class="timer mono" id="timer" aria-label="Tiempo restante">${fmtTime(S.started+S.limit-Date.now())}</div>`:''}</div>
+    <div class="progress" aria-hidden="true"><span style="width:${progress/S.items.length*100}%"></span></div>
+    <article class="qcard">
+      <div class="meta"><span class="chip">${m.n} · ${esc(m.name)}</span><span class="chip d-${q.difficulty}">${DIFF[q.difficulty]}</span><span class="chip">${KIND[q.kind]||esc(q.kind)}</span>
+        <button class="star" data-act="fav" aria-pressed="${fav}">${fav?'★ Favorito':'☆ Favorito'}</button><span class="mono qid">${q.id}</span></div>
+      <h2 class="stem" id="stem" tabindex="-1">${esc(q.stem)}</h2>
+      <div class="opts" role="radiogroup" aria-labelledby="stem">${opts}</div>
+      ${reveal?`<div class="explain ${it.ok?'ok':'bad'}"><span class="verdict">${it.ok?'✓ Correcto':'✗ Incorrecto · la respuesta era '+LETTERS[correctIdx]}</span><p>${esc(q.explanation)}</p><div class="tags">${q.tags.map(t=>`<span>#${esc(t)}</span>`).join('')}</div></div>`:''}
+    </article>
+    ${actions}
+    <p class="kbd muted">Atajos: <kbd>1</kbd>–<kbd>4</kbd> o <kbd>A</kbd>–<kbd>D</kbd> elegir · <kbd>Enter</kbd> ${imm?'confirmar / siguiente':'siguiente'}${imm?'':' · <kbd>←</kbd> <kbd>→</kbd> navegar'}</p>
+  </section>`;
+}
+
+let onlyWrong=false;
+function bdTable(title,map,label){
+  const rows=Object.entries(map).sort((a,b)=>pct(a[1].ok,a[1].n)-pct(b[1].ok,b[1].n)).map(([k,v])=>{const p=pct(v.ok,v.n);
+    return `<tr><td>${label(k)}</td><td class="num">${v.ok}/${v.n}</td><td class="num"><strong>${p}%</strong></td><td><div class="meter" aria-hidden="true"><i class="ok" style="width:${p}%"></i><i class="bad" style="width:${100-p}%"></i></div></td></tr>`;}).join('');
+  return `<div class="tbl-wrap"><table><thead><tr><th>${title}</th><th>Aciertos</th><th>%</th><th><span class="sr">Barra</span></th></tr></thead><tbody>${rows||'<tr><td colspan="4" class="muted">Sin datos</td></tr>'}</tbody></table></div>`;
+}
+function vResults(){
+  const S=P.session;
+  if(!S||!S.finished){setTimeout(()=>go('inicio'));return '';}
+  const sm=summarize(S); const exam=S.mode==='exam'; const passed=sm.score>=S.pass;
+  const wrongCount=S.items.filter(i=>!i.ok).length;
+  const items=S.items.map((it,n)=>{const q=QI[it.q];if(onlyWrong&&it.ok)return '';
+    const ci=it.o.indexOf(q.correct_option_id),yi=it.ch?it.o.indexOf(it.ch):-1;
+    const st=!it.ch?'skip':it.ok?'ok':'bad';
+    return `<div class="ritem ${st}"><div class="meta"><span class="mono muted">${n+1}.</span><span class="chip">${MOD[q.module_id].n}</span><span class="chip d-${q.difficulty}">${DIFF[q.difficulty]}</span><span class="mono qid">${q.id}</span></div>
+      <h3 style="font-family:var(--f-body);font-weight:600">${esc(q.stem)}</h3>
+      <p class="ans">${it.ch?`Tu respuesta: <b>${LETTERS[yi]}. ${esc(q.options.find(o=>o.id===it.ch).text)}</b> ${it.ok?'<span style="color:var(--ok)">✓</span>':'<span style="color:var(--bad)">✗</span>'}`:'<b>Sin responder</b>'}</p>
+      ${it.ok?'':`<p class="ans">Correcta: <b>${LETTERS[ci]}. ${esc(q.options.find(o=>o.id===q.correct_option_id).text)}</b></p>`}
+      <p class="muted" style="font-size:.9rem">${esc(q.explanation)}</p></div>`;}).join('');
+  return `<section>
+    <div class="eyebrow">Resultados · ${esc(S.label)}</div>
+    <div class="score"><div class="big">${sm.score}%</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${exam?`<span class="pill ${passed?'pass':'fail'}" style="align-self:flex-start">${passed?'✓ Aprobado':'✗ No aprobado'} · umbral ${S.pass}%</span>`:''}
+        <span>${sm.correct} correctas de ${exam?sm.total+' preguntas':sm.base+' respondidas'}${exam&&sm.answered<sm.total?` · ${sm.total-sm.answered} sin responder`:''}</span>
+        <span class="muted mono">Tiempo: ${fmtTime(sm.elapsed)} · promedio ${fmtTime(sm.elapsed/Math.max(1,sm.answered))} por pregunta</span></div></div>
+    <div class="row"><button class="btn" data-act="redo" ${wrongCount?'':'disabled'}>Repasar ${wrongCount} errores</button><a class="btn ghost" href="#practica">Nueva práctica</a><a class="btn ghost" href="#examen">Nuevo examen</a><a class="btn ghost" href="#inicio">Inicio</a></div>
+  </section>
+  <section><h2>Desglose</h2><div class="breakdowns">
+    ${bdTable('Módulo',sm.byMod,k=>`${MOD[k].n} ${esc(MOD[k].name)}`)}
+    <div style="display:flex;flex-direction:column;gap:14px">${bdTable('Dificultad',sm.byDiff,k=>DIFF[k])}${bdTable('Tipo',sm.byKind,k=>KIND[k]||esc(k))}</div>
+  </div></section>
+  <section><div class="row"><h2>Revisión de respuestas</h2><span class="spacer"></span>
+    <label class="choice"><input type="checkbox" id="onlywrong" ${onlyWrong?'checked':''}><span>Solo errores</span></label></div>
+    <div class="rev">${items||'<p class="muted">Sin errores en esta sesión.</p>'}</div></section>`;
+}
+
+function vSim(){
+  return `<section>
+    <div class="eyebrow">Sección 9 · fórmulas de eficiencia</div>
+    <h1>Simulador de tickets y ROI</h1>
+    <p class="lede">Editá los supuestos y los resultados se recalculan. Los valores iniciales son el escenario de ejemplo (550 tickets, 40%, 20 min, USD 35/h).</p>
+  </section>
+  <div class="sim">
+    <form class="panel" id="simf" style="gap:12px">
+      <label class="field" for="s-t">Tickets por mes<input type="number" id="s-t" value="550" min="0"></label>
+      <label class="field" for="s-r">Tasa de automatización (%)<input type="number" id="s-r" value="40" min="0" max="100"></label>
+      <label class="field" for="s-m">Minutos ahorrados por ticket automatizado<input type="number" id="s-m" value="20" min="0"></label>
+      <label class="field" for="s-c">Costo por hora (USD)<input type="number" id="s-c" value="35" min="0"></label>
+      <label class="field" for="s-v">Capacidad convertida en beneficio verificado (%)<input type="number" id="s-v" value="60" min="0" max="100"></label>
+      <label class="field" for="s-o">Costo anual de operación IA: LLM, QA, supervisión (USD)<input type="number" id="s-o" value="9000" min="0"></label>
+      <label class="field" for="s-i">Inversión inicial (USD)<input type="number" id="s-i" value="12000" min="0"></label>
+    </form>
+    <div class="panel" style="gap:12px">
+      <div class="out" id="simout"></div>
+      <p class="note">Las horas liberadas son capacidad potencial, no ahorro financiero garantizado. Medí calidad y reopens, y no cuentes dos veces tickets desviados y resueltos.</p>
+    </div>
+  </div>
+  <div class="formula">automated_tickets_month = tickets × automation_rate
+hours_released_month    = automated_tickets × minutes_saved / 60
+annual_capacity_value   = hours_released × cost_per_hour × 12
+annual_verified_benefit = annual_capacity_value × %verificado
+annual_total_cost       = operación anual + inversión inicial (año 1)
+annual_net_benefit      = verified_benefit − total_cost
+roi_pct                 = net_benefit / total_cost × 100
+payback_months          = inversión / ((verified_benefit − operación) / 12)</div>`;
+}
+function calcSim(){
+  const v=id=>Math.max(0,parseFloat($('#'+id).value)||0);
+  const t=v('s-t'),r=v('s-r')/100,m=v('s-m'),c=v('s-c'),vf=v('s-v')/100,op=v('s-o'),inv=v('s-i');
+  const auto=t*r,hrs=auto*m/60,cap=hrs*c*12,ver=cap*vf,tot=op+inv,net=ver-tot,roi=tot?net/tot*100:0,monthly=(ver-op)/12;
+  const n=(x,d=0)=>x.toLocaleString('es-UY',{minimumFractionDigits:d,maximumFractionDigits:d});
+  $('#simout').innerHTML=[
+    ['Tickets automatizados / mes',n(auto)],['Horas liberadas / mes',n(hrs,2)],['Valor anual de capacidad','USD '+n(cap)],
+    ['Beneficio anual verificado','USD '+n(ver)],['Costo total año 1','USD '+n(tot)],
+    ['Beneficio neto año 1',`<span style="color:var(${net>=0?'--ok':'--bad'})">USD ${n(net)}</span>`],
+    ['ROI año 1',`<span style="color:var(${roi>=0?'--ok':'--bad'})">${n(roi,1)}%</span>`],
+    ['Payback',monthly>0?n(inv/monthly,1)+' meses':'No se recupera']
+  ].map(([k,x])=>`<div><span>${k}</span><b>${x}</b></div>`).join('');
+}
+
+function vInterview(){
+  return `<section>
+    <div class="eyebrow">Modo entrevista</div>
+    <h1>Visión de arquitectura y preguntas clave</h1>
+    <p class="lede">Material de práctica, no documentación interna. Ensayá el pitch en voz alta y llevá preguntas propias para el empleador.</p>
+  </section>
+  <section><h2>Pitch de 60 segundos</h2>
+    <blockquote lang="en">I see this role as an opportunity to move from conversational AI to measurable business automation. My first priority would be understanding the existing products, support workflows, ticketing patterns, and current AI architecture. With 500 to 600 tickets per month, I would identify repetitive cases, establish a baseline, and prioritize opportunities by automation potential, risk, and business impact. Architecturally, I would favor reusable components: a secure knowledge layer, specialized agents, controlled workflows, observability, and human approval when necessary. The objective is not simply to deploy six or seven agents. It is to build a scalable AI capability that delivers measurable business value.</blockquote>
+    <p class="muted" style="max-width:70ch">Mensaje central: transformar la operación de soporte en una capacidad más eficiente, segura, confiable y escalable.</p></section>
+  <section><h2>Preguntas para el empleador</h2><ul class="plain">
+    <li><strong>Arquitectura actual:</strong> ¿cómo funciona el chatbot, con qué modelo, herramientas y métricas?</li>
+    <li><strong>Ticketing:</strong> ¿qué sistema se usa y qué tickets históricos pueden analizarse legalmente?</li>
+    <li><strong>Repetición:</strong> ¿qué proporción de los 500–600 tickets es repetitiva y qué categorías dominan?</li>
+    <li><strong>Autonomía:</strong> ¿qué acciones podrán ejecutar los agentes y cuáles requieren aprobación?</li>
+    <li><strong>KB y seguridad:</strong> ¿quién mantiene la base compartida? ¿Cómo se aplican ACL y tenancy?</li>
+    <li><strong>Criterios de éxito:</strong> ¿deflection, MTTR, menores costos, mejor CSAT o todo lo anterior?</li>
+    <li><strong>Autoridad:</strong> ¿qué ownership tendrá el arquitecto sobre backlog, prioridades y decisiones?</li>
+    <li><strong>Límites:</strong> ¿qué productos y unidades de negocio entran en el primer alcance?</li></ul></section>
+  <section><h2>Plan 30-60-90 (caso de estudio)</h2><ul class="plain">
+    <li><strong>Días 1–30, discovery:</strong> entrevistas, mapa de producto y soporte, análisis histórico de tickets, acceso a KB, inventario del chatbot, seguridad y línea base.</li>
+    <li><strong>Días 31–60, piloto:</strong> triage y knowledge con evaluación offline, integración read-only, dashboard de calidad y diseño de RCA asistido.</li>
+    <li><strong>Días 61–90, producción controlada:</strong> métricas con grupo comparable, aprobaciones para remediación, postmortems y roadmap de expansión.</li></ul></section>
+  <section><h2>Plan de estudio de 7 días</h2><div class="tbl-wrap"><table><thead><tr><th>Día</th><th>Foco</th><th>Entregable</th></tr></thead><tbody>
+    ${[['Foundry + Azure OpenAI + Agent Service','Mapa de servicios y restricciones'],['Agent Framework + MCP + patterns','Agente con herramientas y output tipado'],['RAG + AI Search + KB/ACL','Recuperación con citas y filtros de autorización'],['Functions + Logic Apps + orquestación','Workflow controlado y aprobación humana'],['ITSM + RCA + Application Insights','Diseño de agente de investigación de tickets'],['Evals + AgentOps + seguridad + ROI','Golden set, KPIs y business case'],['Arquitectura + liderazgo + 30-60-90','Simulación de entrevista y propuesta ejecutiva']].map((r,i)=>`<tr><td class="num mono">${i+1}</td><td>${r[0]}</td><td class="muted">${r[1]}</td></tr>`).join('')}
+  </tbody></table></div></section>`;
+}
+
+/* ---------- interaction ---------- */
+function choose(i){
+  const S=P.session; if(!S||S.finished) return; const it=S.items[S.idx];
+  if(S.fb==='immediate'&&it.done) return;
+  it.ch=it.o[i]; confirmFinish=false; save(); render();
+  const b=$(`.opt[data-oi="${i}"]`); b&&b.focus();
+}
+function confirmAns(){
+  const S=P.session; const it=S.items[S.idx]; if(!it.ch||it.done) return;
+  tickTime(); record(it,S.id); save(); render();
+  say(it.ok?'Correcto':'Incorrecto. '+QI[it.q].explanation);
+  const n=$('[data-act="next"]'); n&&n.focus();
+}
+function move(d){
+  const S=P.session; const ni=S.idx+d;
+  if(ni<0) return;
+  if(ni>=S.items.length){ if(S.fb==='immediate') finish(); return; }
+  tickTime(); S.idx=ni; confirmFinish=false; save(); render();
+  const st=$('#stem'); st&&st.focus({preventScroll:true}); window.scrollTo({top:0});
+}
+function startReview(kind){
+  const lists={due:dueList(),wrong:wrongList(),fav:favList()};
+  const labels={due:'Repaso pendiente',wrong:'Repaso de errores',fav:'Favoritos'};
+  makeSession('review',shuffle(lists[kind]).slice(0,30),{label:labels[kind],fb:'immediate'});
+}
+
+const bind={
+  inicio(){
+    const io=$('#io'),msg=$('#iomsg');
+    const dump=()=>{const d=Object.assign({},P);return JSON.stringify(d);};
+    $('#app').onclick=e=>{
+      const b=e.target.closest('[data-act],[data-mod]'); if(!b) return;
+      if(b.dataset.mod){preMods=[b.dataset.mod];go('practica');return;}
+      const a=b.dataset.act;
+      if(a==='quick') makeSession('practice',pickPractice(Q,10),{label:'Práctica rápida',fb:'immediate'});
+      else if(a==='due') startReview('due');
+      else commonAct(a,b);
+      if(a==='export'){io.value=dump();msg.textContent='JSON listo para copiar.';}
+      if(a==='copy'){io.value=io.value||dump();const done=()=>msg.textContent='Copiado al portapapeles.';
+        try{navigator.clipboard.writeText(io.value).then(done,()=>{io.select();msg.textContent='Seleccionado: copialo con Ctrl/Cmd+C.';});}catch(err){io.select();msg.textContent='Seleccionado: copialo con Ctrl/Cmd+C.';}}
+      if(a==='download'){const blob=new Blob([dump()],{type:'application/json'});const u=URL.createObjectURL(blob);const l=document.createElement('a');l.href=u;l.download='ai-architect-quiz-progreso.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);msg.textContent='Si la descarga no empieza, usá Copiar.';}
+      if(a==='import'){try{const d=JSON.parse(io.value);if(!d||d.v!==1||!Array.isArray(d.attempts))throw new Error();P=Object.assign(fresh(),d);save();render();say('Progreso importado');}catch(err){msg.textContent='El JSON no es un progreso válido de esta app.';}}
+      if(a==='reset'){if(b.dataset.armed){P=fresh();save();render();say('Progreso borrado');}else{b.dataset.armed='1';b.textContent='Confirmar: borrar todo';}}
+    };
+  },
+  practica(){
+    const f=$('#pform');
+    const pool=()=>{const mods=$$('input[name=mod]:checked',f).map(x=>x.value),diffs=$$('input[name=diff]:checked',f).map(x=>x.value);return Q.filter(q=>mods.includes(q.module_id)&&diffs.includes(q.difficulty));};
+    const upd=()=>{const n=pool().length;$('#pavail').textContent=n+' preguntas disponibles';$('#pstart').disabled=!n;};
+    f.onchange=upd; upd();
+    f.onclick=e=>{const b=e.target.closest('[data-all]');if(b){$$('input[name=mod]',f).forEach(x=>x.checked=b.dataset.all==='1');upd();}};
+    f.onsubmit=e=>{e.preventDefault();const p=pool();if(!p.length)return;
+      const count=+f.querySelector('input[name=count]:checked').value||p.length;
+      const mods=new Set(p.map(q=>q.module_id));
+      const label=mods.size===1?`Práctica · ${MOD[[...mods][0]].n} ${MOD[[...mods][0]].name}`:`Práctica · ${mods.size} módulos`;
+      preMods=null;
+      makeSession('practice',pickPractice(p,count),{label,fb:f.querySelector('input[name=fb]:checked').value});};
+    $('#app').querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>commonAct(b.dataset.act,b));
+  },
+  examen(){
+    const f=$('#eform');
+    f.onsubmit=e=>{e.preventDefault();
+      const count=+f.querySelector('input[name=count]:checked').value, mins=+f.querySelector('input[name=time]:checked').value;
+      let pass=Math.round(+$('#epass').value)||80; pass=Math.min(100,Math.max(1,pass)); P.settings.pass=pass;
+      makeSession('exam',pickExam(count),{label:`Examen · ${count} preguntas`,fb:'end',limit:mins*60000,pass});};
+    $('#app').querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>commonAct(b.dataset.act,b));
+  },
+  repaso(){
+    $('#app').onclick=e=>{const b=e.target.closest('[data-rev],[data-act]');if(!b)return;if(b.dataset.rev)startReview(b.dataset.rev);else commonAct(b.dataset.act,b);};
+  },
+  quiz(){
+    if(!shownAt) shownAt=performance.now();
+    $('#app').onclick=e=>{
+      const o=e.target.closest('.opt');if(o){choose(+o.dataset.oi);return;}
+      const d=e.target.closest('[data-go]');if(d){tickTime();P.session.idx=+d.dataset.go;confirmFinish=false;save();render();return;}
+      const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,S=P.session;
+      if(a==='confirm')confirmAns();
+      else if(a==='next')move(1);
+      else if(a==='prev')move(-1);
+      else if(a==='fav'){const id=S.items[S.idx].q;P.fav=P.fav.includes(id)?P.fav.filter(x=>x!==id):[...P.fav,id];save();render();}
+      else if(a==='end'){const un=S.items.filter(i=>!i.ch).length;if(S.fb==='end'&&un){confirmFinish=true;render();}else finish();}
+      else if(a==='endyes'){confirmFinish=false;finish();}
+      else if(a==='endno'){confirmFinish=false;render();}
+    };
+  },
+  resultados(){
+    const ow=$('#onlywrong'); if(ow) ow.onchange=()=>{onlyWrong=ow.checked;render();};
+    $('#app').onclick=e=>{const b=e.target.closest('[data-act="redo"]');if(!b)return;
+      const S=P.session;const qs=S.items.filter(i=>!i.ok).map(i=>QI[i.q]);
+      makeSession('review',shuffle(qs),{label:'Repaso de errores de la sesión',fb:'immediate'});};
+  },
+  simulador(){$('#simf').oninput=calcSim;$('#simf').onsubmit=e=>e.preventDefault();calcSim();},
+  entrevista(){}
+};
+function commonAct(a){
+  if(a==='resume') go('quiz');
+  else if(a==='discard'){P.session=null;save();render();}
+}
+
+document.addEventListener('keydown',e=>{
+  if(route()!=='quiz'||!P.session||P.session.finished) return;
+  if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,textarea,select')) return;
+  if(e.target.matches('button:not(.opt)')&&(e.key==='Enter'||e.key===' ')) return;
+  const k=e.key.toLowerCase(); let i='1234'.indexOf(k); if(i<0) i='abcd'.indexOf(k);
+  const S=P.session,it=S.items[S.idx];
+  if(i>=0&&k.length===1){e.preventDefault();choose(i);return;}
+  if(k==='enter'){e.preventDefault();
+    if(S.fb==='immediate'){ if(it.done) move(1); else confirmAns(); }
+    else if(S.idx<S.items.length-1) move(1);
+    return;}
+  if(S.fb==='end'&&k==='arrowright'){e.preventDefault();move(1);}
+  if(S.fb==='end'&&k==='arrowleft'){e.preventDefault();move(-1);}
+});
+
+setInterval(()=>{
+  const S=P.session; if(!S||S.finished||!S.limit||route()!=='quiz') return;
+  const rem=S.started+S.limit-Date.now(); const t=$('#timer');
+  if(t){t.textContent=fmtTime(rem);t.classList.toggle('low',rem<5*60000);}
+  if(rem<=0){say('Tiempo agotado');finish();}
+},500);
+
+$('#foot').innerHTML=`Banco v1 · ${Q.length} preguntas válidas de ${BANK.length}${issues.length?` · <span style="color:var(--bad)">${issues.length} problemas de validación: ${esc(issues.slice(0,3).join('; '))}</span>`:' · validación OK'} · Material de estudio, no documentación interna de Lockton.`;
+render();
+})();
+</script>
+
+</html>
