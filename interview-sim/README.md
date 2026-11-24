@@ -1,12 +1,14 @@
-# Simulador de entrevista por voz
+# Simulador de entrevista
 
-Práctica de entrevista para AI Architect: el entrevistador lee la pregunta en voz alta (ElevenLabs), vos respondés hablando, la respuesta se transcribe (ElevenLabs Speech-to-Text) y Claude la evalúa.
+Práctica de entrevista para AI Architect: la app muestra una pregunta, vos respondés hablando, la respuesta se transcribe con ElevenLabs Speech-to-Text y Claude la evalúa.
+
+La transcripción detecta sola el idioma y entiende inglés con acento de EE. UU., inglés con acento de India y español. Si en respuestas muy cortas detecta mal el idioma, podés fijarlo en "Solo inglés" o "Solo español".
 
 Cada respuesta recibe:
 - Puntaje de 1 a 5 y un veredicto.
 - Qué cubriste y qué faltó.
 - Feedback sobre la comunicación oral.
-- Una respuesta modelo, que podés escuchar.
+- Una respuesta modelo.
 - Una repregunta, que podés responder en el momento.
 
 ## Preguntas
@@ -29,11 +31,9 @@ Abrí la app en `http://127.0.0.1:8000`, no en la IP de la red: el navegador sol
 ## Uso
 
 1. Elegí idioma, tipo de pregunta y módulo, y presioná **Empezar**.
-2. Con "Escuchar y evaluar automáticamente", la grabación empieza cuando termina la pregunta y corta tras el silencio configurado (1,8, 2,5 o 4 s). También podés cortar con **Terminé de responder**.
-3. Revisá o corregí la transcripción. En modo automático se evalúa sola.
+2. Con la opción automática activada, la grabación empieza al mostrarse la pregunta y corta tras el silencio configurado (1,8, 2,5 o 4 s). También podés cortar con **Terminé de responder**.
+3. Revisá o corregí la transcripción; arriba se ve el idioma detectado. En modo automático se evalúa sola.
 4. Tras el feedback podés **Responder repregunta**, **Reintentar esta pregunta** o pasar a la **Siguiente pregunta**.
-
-Usá auriculares para que el micrófono no capte la voz del entrevistador.
 
 El historial se guarda en `sessions/AAAA-MM-DD.jsonl`, que no se sube a git.
 
@@ -41,8 +41,6 @@ El historial se guarda en `sessions/AAAA-MM-DD.jsonl`, que no se sube a git.
 
 | Variable | Default |
 |---|---|
-| `ELEVENLABS_VOICE_ID` | `JBFqnCBsd6RMkjVDRZzb` (cualquier voz de tu cuenta) |
-| `ELEVENLABS_TTS_MODEL` | `eleven_multilingual_v2` |
 | `ELEVENLABS_STT_MODEL` | `scribe_v1` |
 | `CLAUDE_MODEL` | `claude-opus-5-5` |
 

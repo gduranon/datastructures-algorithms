@@ -35,7 +35,6 @@ textarea{width:100%;min-height:110px;resize:vertical}
 .status{display:flex;align-items:center;gap:10px;font-weight:600}
 .dot{width:12px;height:12px;border-radius:50%;background:var(--muted)}
 .s-listening .dot{background:var(--bad);animation:pulse 1s infinite}
-.s-speaking .dot{background:var(--accent)}
 .s-busy .dot{background:var(--warn)}
 @keyframes pulse{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.s-listening .dot{animation:none}}
@@ -60,20 +59,20 @@ ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 <body>
 <div class="wrap">
   <header class="row">
-    <div><h1>Simulador de entrevista</h1><p class="muted">Te pregunto en voz alta, respondés hablando y recibís feedback con una repregunta.</p></div>
+    <div><h1>Simulador de entrevista</h1><p class="muted">Leé la pregunta, respondé hablando en inglés o español y recibí feedback con una repregunta.</p></div>
   </header>
 
   <div id="cfgwarn"></div>
 
   <section class="panel" aria-label="Configuración">
     <div class="row">
-      <label class="f" for="lang">Idioma<select id="lang"><option value="es">Español</option><option value="en">English</option></select></label>
+      <label class="f" for="lang">Preguntas y feedback en<select id="lang"><option value="es">Español</option><option value="en">English</option></select></label>
+      <label class="f" for="sttLang">Reconocer mi respuesta en<select id="sttLang"><option value="auto">Automático: inglés US, inglés India o español</option><option value="eng">Solo inglés (US o India)</option><option value="spa">Solo español</option></select></label>
       <label class="f" for="source">Preguntas<select id="source"><option value="all">Todas</option><option value="abierta">Abiertas de arquitectura</option><option value="banco">Banco del quiz</option></select></label>
       <label class="f" for="module">Módulo<select id="module"><option value="">Todos</option></select></label>
     </div>
     <div class="row">
-      <label class="chk"><input type="checkbox" id="voice" checked> Leer preguntas en voz alta</label>
-      <label class="chk"><input type="checkbox" id="auto" checked> Escuchar y evaluar automáticamente</label>
+      <label class="chk"><input type="checkbox" id="auto" checked> Empezar a escuchar al mostrar la pregunta y evaluar solo</label>
       <label class="f" for="silence">Silencio para cortar<select id="silence"><option value="1800">1,8 s</option><option value="2500" selected>2,5 s</option><option value="4000">4 s</option></select></label>
     </div>
   </section>
@@ -89,7 +88,6 @@ ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
     <p class="question" id="qtext">Presioná <strong>Empezar</strong> para recibir la primera pregunta.</p>
     <div class="row">
       <button class="btn" id="start">Empezar</button>
-      <button class="btn ghost" id="repeat" disabled>Repetir pregunta</button>
       <button class="btn stop" id="stopRec" hidden>Terminé de responder</button>
       <button class="btn ghost" id="listen" disabled>Responder</button>
     </div>
@@ -97,7 +95,7 @@ ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
   </section>
 
   <section class="panel" id="answerBox" hidden>
-    <h2>Tu respuesta (transcripción)</h2>
+    <div class="row"><h2>Tu respuesta (transcripción)</h2><span class="spacer"></span><span class="chip" id="detLang" hidden></span></div>
     <textarea id="answer" aria-label="Transcripción de tu respuesta"></textarea>
     <div class="row"><button class="btn" id="evalBtn">Evaluar</button><span class="muted" style="font-size:.84rem">Podés corregir la transcripción antes de evaluar.</span></div>
   </section>
@@ -117,7 +115,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let cur = null;          // {id, text, module, difficulty, source, followUp}
 let asked = [];
-let audioEl = null, stream = null, rec = null, chunks = [], actx = null, raf = 0, recStart = 0;
+let answerLang = '', stream = null, rec = null, chunks = [], actx = null, raf = 0, recStart = 0;
 
 function setStatus(kind, text){ $('status').className = 'status s-' + kind; $('stext').textContent = text; }
 function showErr(msg){ $('err').innerHTML = msg ? `<p class="err">${esc(msg)}</p>` : ''; }
@@ -131,11 +129,11 @@ async function loadConfig(){
   try{
     const c = await (await api('/api/config')).json();
     c.modules.forEach(m => $('module').insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`));
-    if (!c.elevenlabs) $('cfgwarn').innerHTML = '<p class="warn">Falta ELEVENLABS_API_KEY en interview-sim/.env: sin voz ni transcripción. Podés escribir las respuestas a mano.</p>';
+    if (!c.elevenlabs) $('cfgwarn').innerHTML = '<p class="warn">Falta ELEVENLABS_API_KEY en interview-sim/.env: no hay transcripción. Podés escribir las respuestas a mano.</p>';
   }catch(e){ showErr(e.message); }
 }
 
-/* ---------- question + voice ---------- */
+/* ---------- question ---------- */
 async function nextQuestion(){
   showErr(''); $('fbBox').hidden = true; $('answerBox').hidden = true; $('answer').value = '';
   const p = new URLSearchParams({source:$('source').value, module:$('module').value, lang:$('lang').value, exclude:asked.join(',')});
@@ -147,27 +145,18 @@ async function nextQuestion(){
   }
   asked.push(cur.id);
   renderQuestion();
-  await speakThenListen();
+  readyToAnswer();
 }
 function renderQuestion(){
   $('qtext').textContent = cur.text;
   $('qmeta').innerHTML = (cur.followUp ? '<span class="chip fu">Repregunta</span>' : '') +
     `<span class="chip">${esc(cur.module)}</span><span class="chip">${esc(cur.difficulty)}</span><span class="chip">${esc(cur.source)}</span><span class="chip mono">${esc(cur.id)}</span>`;
-  $('repeat').disabled = false; $('listen').disabled = false; $('start').textContent = 'Siguiente pregunta';
+  $('listen').disabled = false; $('start').textContent = 'Siguiente pregunta';
 }
-async function speak(text){
-  if (!$('voice').checked) return;
-  setStatus('speaking', 'Entrevistador hablando…');
-  try{
-    const blob = await (await api('/api/tts', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text})})).blob();
-    if (audioEl) audioEl.pause();
-    audioEl = new Audio(URL.createObjectURL(blob));
-    await new Promise(res => { audioEl.onended = res; audioEl.onerror = res; audioEl.play().catch(res); });
-  }catch(e){ showErr('Voz: ' + e.message); }
-}
-async function speakThenListen(){
-  await speak(cur.text);
-  if ($('auto').checked) startListening(); else setStatus('idle', 'Presioná Responder cuando estés listo');
+function readyToAnswer(){
+  answerLang = ''; $('detLang').hidden = true;
+  if ($('auto').checked) setTimeout(startListening, 600);
+  else setStatus('idle', 'Presioná Responder cuando estés listo');
 }
 
 /* ---------- listening with silence detection ---------- */
@@ -214,10 +203,12 @@ async function transcribe(){
   setStatus('busy', 'Transcribiendo…');
   const fd = new FormData();
   fd.append('audio', new Blob(chunks, {type: rec.mimeType || 'audio/webm'}), 'answer.webm');
-  fd.append('lang', $('lang').value);
+  fd.append('stt_lang', $('sttLang').value);
   try{
-    const {text} = await (await api('/api/stt', {method:'POST', body:fd})).json();
+    const {text, language, probability} = await (await api('/api/stt', {method:'POST', body:fd})).json();
     $('answerBox').hidden = false; $('answer').value = text;
+    answerLang = language || '';
+    if (language){ $('detLang').hidden = false; $('detLang').textContent = 'Detectado: ' + language + (probability ? ` (${Math.round(probability*100)}%)` : ''); }
     if (!text){ setStatus('idle', 'No escuché nada. Presioná Responder para intentar de nuevo.'); return; }
     if ($('auto').checked) evaluate(); else setStatus('idle', 'Revisá la transcripción y presioná Evaluar');
   }catch(e){ showErr('Transcripción: ' + e.message); setStatus('idle', 'Error'); $('answerBox').hidden = false; }
@@ -230,7 +221,7 @@ async function evaluate(){
   setStatus('busy', 'Evaluando con Claude…'); $('evalBtn').disabled = true; showErr('');
   try{
     const fb = await (await api('/api/evaluate', {method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({question_id:cur.id, question:cur.text, answer, lang:$('lang').value, is_follow_up:!!cur.followUp})})).json();
+      body:JSON.stringify({question_id:cur.id, question:cur.text, answer, lang:$('lang').value, answer_lang:answerLang, is_follow_up:!!cur.followUp})})).json();
     renderFeedback(fb); setStatus('idle', 'Listo'); loadHistory();
   }catch(e){ showErr('Evaluación: ' + e.message); setStatus('idle', 'Error'); }
   $('evalBtn').disabled = false;
@@ -242,15 +233,14 @@ function renderFeedback(fb){
     <div class="row"><div class="score s${fb.score}">${fb.score}/5</div><p style="flex:1;min-width:220px;font-weight:600">${esc(fb.verdict)}</p></div>
     <div class="cols"><div class="good"><h3>Cubriste</h3>${li(fb.covered)}</div><div class="gap"><h3>Faltó</h3>${li(fb.missing)}</div></div>
     <div><h3>Comunicación</h3><p>${esc(fb.communication)}</p></div>
-    <div><div class="row"><h3>Respuesta modelo</h3><button class="btn ghost" id="hearModel">Escucharla</button></div><p class="model">${esc(fb.model_answer)}</p></div>
+    <div><h3>Respuesta modelo</h3><p class="model">${esc(fb.model_answer)}</p></div>
     <div><h3>Repregunta</h3><p>${esc(fb.follow_up)}</p></div>
     <div class="row"><button class="btn" id="doFollow">Responder repregunta</button><button class="btn ghost" id="retry">Reintentar esta pregunta</button><button class="btn ghost" id="next2">Siguiente pregunta</button></div>`;
-  $('hearModel').onclick = () => speak(fb.model_answer).then(() => setStatus('idle', 'Listo'));
   $('doFollow').onclick = async () => {
     cur = {...cur, id: cur.id.replace(/-FU$/, '') + '-FU', text: fb.follow_up, followUp: true};
-    box.hidden = true; $('answerBox').hidden = true; renderQuestion(); await speakThenListen();
+    box.hidden = true; $('answerBox').hidden = true; renderQuestion(); readyToAnswer();
   };
-  $('retry').onclick = async () => { box.hidden = true; $('answerBox').hidden = true; await speakThenListen(); };
+  $('retry').onclick = () => { box.hidden = true; $('answerBox').hidden = true; readyToAnswer(); };
   $('next2').onclick = nextQuestion;
   box.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
 }
@@ -263,7 +253,6 @@ async function loadHistory(){
 }
 
 $('start').onclick = nextQuestion;
-$('repeat').onclick = () => cur && speak(cur.text).then(() => setStatus('idle', 'Listo'));
 $('listen').onclick = startListening;
 $('stopRec').onclick = stopListening;
 $('evalBtn').onclick = evaluate;

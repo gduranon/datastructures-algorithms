@@ -1,8 +1,8 @@
-"""Simulador de entrevista por voz (AI Architect).
+"""Simulador de entrevista (AI Architect).
 
-Flujo: el entrevistador lee una pregunta en voz alta (ElevenLabs TTS), vos respondés
-hablando, la respuesta se transcribe (ElevenLabs Speech-to-Text) y Claude la evalúa
-con un feedback estructurado y una repregunta.
+Flujo: la app muestra una pregunta, vos respondés hablando, la respuesta se transcribe
+con ElevenLabs Speech-to-Text (detección automática de inglés US, inglés de India o español)
+y Claude la evalúa con un feedback estructurado y una repregunta.
 
 Ejecutar:  uvicorn app:app --reload   (o: python app.py)  ->  http://127.0.0.1:8000
 """
@@ -19,7 +19,7 @@ import anthropic
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -27,8 +27,6 @@ HERE = Path(__file__).parent
 load_dotenv(HERE / ".env")
 
 ELEVEN_KEY = os.getenv("ELEVENLABS_API_KEY", "")
-ELEVEN_VOICE = os.getenv("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb")
-ELEVEN_TTS_MODEL = os.getenv("ELEVENLABS_TTS_MODEL", "eleven_multilingual_v2")
 ELEVEN_STT_MODEL = os.getenv("ELEVENLABS_STT_MODEL", "scribe_v1")
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-5-5")
 ELEVEN_BASE = "https://api.elevenlabs.io/v1"
@@ -79,7 +77,9 @@ SYSTEM = (
     "Sos un entrevistador técnico senior evaluando a un candidato a AI Architect "
     "(agentes de IA sobre Azure, RAG, ITSM, RCA, AgentOps, seguridad, ROI, liderazgo de un equipo chico). "
     "Recibís la pregunta, una referencia opcional y la transcripción automática de la respuesta oral del candidato. "
-    "La transcripción puede tener errores de reconocimiento de voz: no penalices palabras mal transcritas si la idea se entiende. "
+    "El candidato puede responder en español o en inglés, con acento de EE. UU., de India o hispanohablante. "
+    "La transcripción automática puede tener errores por el acento o el reconocimiento de voz: no penalices palabras mal transcritas "
+    "ni el acento si la idea se entiende; evaluá contenido, estructura y claridad. "
     "Evaluá con rigor y sin inflar el puntaje: valorá trade-offs, seguridad, métricas, human-in-the-loop y cuándo NO usar un LLM. "
     "Si la respuesta está vacía o no responde la pregunta, decilo y puntuá 1. "
     "Escribí el feedback en el idioma indicado; la respuesta modelo debe sonar natural dicha en voz alta."
@@ -96,9 +96,10 @@ class Feedback(BaseModel):
     follow_up: str
 
 
-def evaluate(question: str, reference: str | None, answer: str, lang: str) -> Feedback:
+def evaluate(question: str, reference: str | None, answer: str, lang: str, answer_lang: str) -> Feedback:
     user = (
-        f"Idioma del feedback: {'español (Uruguay)' if lang == 'es' else 'English'}\n\n"
+        f"Idioma del feedback: {'español (Uruguay)' if lang == 'es' else 'English'}\n"
+        f"Idioma detectado en la respuesta: {answer_lang or 'desconocido'}\n\n"
         f"<pregunta>{question}</pregunta>\n"
         + (f"<referencia>{reference}</referencia>\n" if reference else "")
         + f"<respuesta_transcrita>{answer}</respuesta_transcrita>"
@@ -171,42 +172,34 @@ def question(source: Literal["all", "banco", "abierta"] = "all", module: str = "
             "text": q["text"].get(lang) or q["text"]["es"]}
 
 
-class TTSIn(BaseModel):
-    text: str
-
-
-@app.post("/api/tts")
-async def tts(body: TTSIn):
-    need_eleven()
-    async with httpx.AsyncClient(timeout=60) as http:
-        r = await http.post(
-            f"{ELEVEN_BASE}/text-to-speech/{ELEVEN_VOICE}",
-            params={"output_format": "mp3_44100_128"},
-            headers={"xi-api-key": ELEVEN_KEY},
-            json={"text": body.text[:2500], "model_id": ELEVEN_TTS_MODEL},
-        )
-    if r.status_code != 200:
-        raise HTTPException(502, f"ElevenLabs TTS {r.status_code}: {r.text[:300]}")
-    return Response(r.content, media_type="audio/mpeg")
+# "auto" deja que Scribe detecte el idioma: cubre inglés US, inglés de India y español
+# en la misma sesión. Forzar "eng" o "spa" ayuda si la detección se confunde en respuestas cortas.
+STT_LANGS = {"auto": None, "eng": "eng", "spa": "spa"}
+LANG_NAMES = {"eng": "inglés", "en": "inglés", "spa": "español", "es": "español"}
 
 
 @app.post("/api/stt")
-async def stt(audio: UploadFile = File(...), lang: str = Form("es")):
+async def stt(audio: UploadFile = File(...), stt_lang: str = Form("auto")):
     need_eleven()
     data = await audio.read()
     if len(data) < 2000:
-        return {"text": ""}
+        return {"text": "", "language": None, "probability": None}
+    form = {"model_id": ELEVEN_STT_MODEL, "tag_audio_events": "false"}
+    if STT_LANGS.get(stt_lang):
+        form["language_code"] = STT_LANGS[stt_lang]
     async with httpx.AsyncClient(timeout=120) as http:
         r = await http.post(
             f"{ELEVEN_BASE}/speech-to-text",
             headers={"xi-api-key": ELEVEN_KEY},
-            data={"model_id": ELEVEN_STT_MODEL, "language_code": "spa" if lang == "es" else "eng",
-                  "tag_audio_events": "false"},
+            data=form,
             files={"file": (audio.filename or "answer.webm", data, audio.content_type or "audio/webm")},
         )
     if r.status_code != 200:
         raise HTTPException(502, f"ElevenLabs STT {r.status_code}: {r.text[:300]}")
-    return {"text": r.json().get("text", "").strip()}
+    j = r.json()
+    code = j.get("language_code")
+    return {"text": j.get("text", "").strip(), "language": LANG_NAMES.get(code, code),
+            "probability": j.get("language_probability")}
 
 
 class EvalIn(BaseModel):
@@ -214,6 +207,7 @@ class EvalIn(BaseModel):
     question: str
     answer: str
     lang: str = "es"
+    answer_lang: str = ""
     is_follow_up: bool = False
 
 
@@ -221,7 +215,7 @@ class EvalIn(BaseModel):
 def evaluate_ep(body: EvalIn):
     q = QBY_ID.get(body.question_id)
     reference = None if body.is_follow_up or not q else q.get("reference")
-    fb = evaluate(body.question, reference, body.answer, body.lang)
+    fb = evaluate(body.question, reference, body.answer, body.lang, body.answer_lang)
     record = {"t": datetime.now().isoformat(timespec="seconds"), **body.model_dump(), "feedback": fb.model_dump()}
     with open(SESSIONS_DIR / f"{datetime.now():%Y-%m-%d}.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
