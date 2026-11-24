@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de entrevista</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Schibsted+Grotesk:wght@700;800&display=swap">
+<style>
+:root{--bg:#f2f4f8;--surface:#fff;--sunk:#e7ebf2;--ink:#121826;--muted:#566176;--line:#d6dce7;--accent:#2343c2;--accent-soft:#e2e7fa;--on-accent:#fff;
+--ok:#17744b;--ok-bg:#e2f2e9;--bad:#b0212e;--bad-bg:#fae6e8;--warn:#8a5900;--warn-bg:#faefd4;
+--f-display:"Schibsted Grotesk",system-ui,sans-serif;--f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#0e121a;--surface:#161b26;--sunk:#1d2330;--ink:#e6e9f0;--muted:#9aa3b6;--line:#2a3242;--accent:#8099ff;--accent-soft:#1f2747;--on-accent:#0e121a;
+--ok:#5fcf98;--ok-bg:#14291f;--bad:#ff8b92;--bad-bg:#311619;--warn:#f0bd5a;--warn-bg:#2d2411;color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body)}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 64px;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.2}
+h1{font-size:1.6rem}h2{font-size:1.15rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:.8rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spacer{flex:1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.82rem;font-weight:600;color:var(--muted)}
+select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{width:100%;min-height:110px;resize:vertical}
+.chk{display:flex;gap:6px;align-items:center;font-size:.88rem}
+.btn{appearance:none;border:1px solid transparent;background:var(--accent);color:var(--on-accent);font:600 .92rem var(--f-body);padding:10px 16px;border-radius:8px;cursor:pointer;min-height:42px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.stop{background:var(--bad);color:var(--on-accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.status{display:flex;align-items:center;gap:10px;font-weight:600}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--muted)}
+.s-listening .dot{background:var(--bad);animation:pulse 1s infinite}
+.s-speaking .dot{background:var(--accent)}
+.s-busy .dot{background:var(--warn)}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.s-listening .dot{animation:none}}
+.meter{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .08s}
+.question{font-size:1.25rem;font-weight:600;line-height:1.45}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:.74rem;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--sunk);color:var(--muted)}
+.chip.fu{background:var(--accent-soft);color:var(--accent)}
+.score{font-family:var(--f-display);font-size:2.4rem;font-weight:800;line-height:1}
+.s1,.s2{color:var(--bad)}.s3{color:var(--warn)}.s4,.s5{color:var(--ok)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.good h3{color:var(--ok)}.gap h3{color:var(--bad)}
+.model{background:var(--sunk);border-radius:8px;padding:12px 14px;white-space:pre-wrap}
+.err{background:var(--bad-bg);color:var(--bad);padding:10px 12px;border-radius:8px;font-weight:600}
+.warn{background:var(--warn-bg);color:var(--warn);padding:10px 12px;border-radius:8px}
+.hist div{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.hist div:last-child{border:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="row">
+    <div><h1>Simulador de entrevista</h1><p class="muted">Te pregunto en voz alta, respondés hablando y recibís feedback con una repregunta.</p></div>
+  </header>
+
+  <div id="cfgwarn"></div>
+
+  <section class="panel" aria-label="Configuración">
+    <div class="row">
+      <label class="f" for="lang">Idioma<select id="lang"><option value="es">Español</option><option value="en">English</option></select></label>
+      <label class="f" for="source">Preguntas<select id="source"><option value="all">Todas</option><option value="abierta">Abiertas de arquitectura</option><option value="banco">Banco del quiz</option></select></label>
+      <label class="f" for="module">Módulo<select id="module"><option value="">Todos</option></select></label>
+    </div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="voice" checked> Leer preguntas en voz alta</label>
+      <label class="chk"><input type="checkbox" id="auto" checked> Escuchar y evaluar automáticamente</label>
+      <label class="f" for="silence">Silencio para cortar<select id="silence"><option value="1800">1,8 s</option><option value="2500" selected>2,5 s</option><option value="4000">4 s</option></select></label>
+    </div>
+  </section>
+
+  <section class="panel" aria-live="polite">
+    <div class="row">
+      <div class="status" id="status"><span class="dot"></span><span id="stext">Listo</span></div>
+      <span class="spacer"></span>
+      <span class="mono muted" id="timer"></span>
+    </div>
+    <div class="meter" aria-hidden="true"><i id="level"></i></div>
+    <div class="chips" id="qmeta"></div>
+    <p class="question" id="qtext">Presioná <strong>Empezar</strong> para recibir la primera pregunta.</p>
+    <div class="row">
+      <button class="btn" id="start">Empezar</button>
+      <button class="btn ghost" id="repeat" disabled>Repetir pregunta</button>
+      <button class="btn stop" id="stopRec" hidden>Terminé de responder</button>
+      <button class="btn ghost" id="listen" disabled>Responder</button>
+    </div>
+    <div id="err"></div>
+  </section>
+
+  <section class="panel" id="answerBox" hidden>
+    <h2>Tu respuesta (transcripción)</h2>
+    <textarea id="answer" aria-label="Transcripción de tu respuesta"></textarea>
+    <div class="row"><button class="btn" id="evalBtn">Evaluar</button><span class="muted" style="font-size:.84rem">Podés corregir la transcripción antes de evaluar.</span></div>
+  </section>
+
+  <section class="panel" id="fbBox" hidden></section>
+
+  <section class="panel">
+    <div class="row"><h2>Historial</h2><span class="spacer"></span><button class="btn ghost" id="histBtn">Actualizar</button></div>
+    <div class="hist" id="hist"><p class="muted">Sin respuestas evaluadas todavía.</p></div>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let cur = null;          // {id, text, module, difficulty, source, followUp}
+let asked = [];
+let audioEl = null, stream = null, rec = null, chunks = [], actx = null, raf = 0, recStart = 0;
+
+function setStatus(kind, text){ $('status').className = 'status s-' + kind; $('stext').textContent = text; }
+function showErr(msg){ $('err').innerHTML = msg ? `<p class="err">${esc(msg)}</p>` : ''; }
+async function api(path, opts){
+  const r = await fetch(path, opts);
+  if (!r.ok){ let m = r.statusText; try { m = (await r.json()).detail || m; } catch(e){} throw new Error(m); }
+  return r;
+}
+
+async function loadConfig(){
+  try{
+    const c = await (await api('/api/config')).json();
+    c.modules.forEach(m => $('module').insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`));
+    if (!c.elevenlabs) $('cfgwarn').innerHTML = '<p class="warn">Falta ELEVENLABS_API_KEY en interview-sim/.env: sin voz ni transcripción. Podés escribir las respuestas a mano.</p>';
+  }catch(e){ showErr(e.message); }
+}
+
+/* ---------- question + voice ---------- */
+async function nextQuestion(){
+  showErr(''); $('fbBox').hidden = true; $('answerBox').hidden = true; $('answer').value = '';
+  const p = new URLSearchParams({source:$('source').value, module:$('module').value, lang:$('lang').value, exclude:asked.join(',')});
+  try{
+    cur = await (await api('/api/question?' + p)).json();
+  }catch(e){
+    if (asked.length){ asked = []; return nextQuestion(); }
+    return showErr(e.message);
+  }
+  asked.push(cur.id);
+  renderQuestion();
+  await speakThenListen();
+}
+function renderQuestion(){
+  $('qtext').textContent = cur.text;
+  $('qmeta').innerHTML = (cur.followUp ? '<span class="chip fu">Repregunta</span>' : '') +
+    `<span class="chip">${esc(cur.module)}</span><span class="chip">${esc(cur.difficulty)}</span><span class="chip">${esc(cur.source)}</span><span class="chip mono">${esc(cur.id)}</span>`;
+  $('repeat').disabled = false; $('listen').disabled = false; $('start').textContent = 'Siguiente pregunta';
+}
+async function speak(text){
+  if (!$('voice').checked) return;
+  setStatus('speaking', 'Entrevistador hablando…');
+  try{
+    const blob = await (await api('/api/tts', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text})})).blob();
+    if (audioEl) audioEl.pause();
+    audioEl = new Audio(URL.createObjectURL(blob));
+    await new Promise(res => { audioEl.onended = res; audioEl.onerror = res; audioEl.play().catch(res); });
+  }catch(e){ showErr('Voz: ' + e.message); }
+}
+async function speakThenListen(){
+  await speak(cur.text);
+  if ($('auto').checked) startListening(); else setStatus('idle', 'Presioná Responder cuando estés listo');
+}
+
+/* ---------- listening with silence detection ---------- */
+async function startListening(){
+  if (rec && rec.state === 'recording') return;
+  showErr('');
+  try{
+    stream = stream || await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}});
+  }catch(e){ return showErr('No hay acceso al micrófono: ' + e.message); }
+  actx = actx || new AudioContext();
+  const src = actx.createMediaStreamSource(stream), an = actx.createAnalyser();
+  an.fftSize = 1024; src.connect(an);
+  const buf = new Float32Array(an.fftSize);
+  const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : '';
+  rec = new MediaRecorder(stream, mime ? {mimeType:mime} : undefined);
+  chunks = []; rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+  rec.onstop = () => { cancelAnimationFrame(raf); src.disconnect(); $('level').style.width = '0'; transcribe(); };
+  rec.start(250); recStart = performance.now();
+  setStatus('listening', 'Escuchando… hablá cuando quieras');
+  $('stopRec').hidden = false; $('listen').disabled = true;
+
+  let spoke = false, lastVoice = performance.now(), noise = 0.01;
+  const silenceMs = +$('silence').value;
+  const loop = () => {
+    an.getFloatTimeDomainData(buf);
+    let s = 0; for (const v of buf) s += v*v;
+    const rms = Math.sqrt(s / buf.length), now = performance.now();
+    if (!spoke) noise = noise*0.97 + rms*0.03;
+    const thr = Math.max(0.015, noise*2.5);
+    $('level').style.width = Math.min(100, rms*400) + '%';
+    if (rms > thr){ if (!spoke){ spoke = true; setStatus('listening', 'Escuchando tu respuesta…'); } lastVoice = now; }
+    $('timer').textContent = fmt(now - recStart);
+    const tooLong = now - recStart > 240000, noSpeech = !spoke && now - recStart > 20000;
+    if ((spoke && now - lastVoice > silenceMs) || tooLong || noSpeech){ stopListening(); return; }
+    raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+}
+function stopListening(){ if (rec && rec.state === 'recording') rec.stop(); $('stopRec').hidden = true; }
+const fmt = ms => { const s = Math.floor(ms/1000); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
+
+async function transcribe(){
+  $('listen').disabled = false;
+  setStatus('busy', 'Transcribiendo…');
+  const fd = new FormData();
+  fd.append('audio', new Blob(chunks, {type: rec.mimeType || 'audio/webm'}), 'answer.webm');
+  fd.append('lang', $('lang').value);
+  try{
+    const {text} = await (await api('/api/stt', {method:'POST', body:fd})).json();
+    $('answerBox').hidden = false; $('answer').value = text;
+    if (!text){ setStatus('idle', 'No escuché nada. Presioná Responder para intentar de nuevo.'); return; }
+    if ($('auto').checked) evaluate(); else setStatus('idle', 'Revisá la transcripción y presioná Evaluar');
+  }catch(e){ showErr('Transcripción: ' + e.message); setStatus('idle', 'Error'); $('answerBox').hidden = false; }
+}
+
+/* ---------- feedback ---------- */
+async function evaluate(){
+  const answer = $('answer').value.trim();
+  if (!cur || !answer) return;
+  setStatus('busy', 'Evaluando con Claude…'); $('evalBtn').disabled = true; showErr('');
+  try{
+    const fb = await (await api('/api/evaluate', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question_id:cur.id, question:cur.text, answer, lang:$('lang').value, is_follow_up:!!cur.followUp})})).json();
+    renderFeedback(fb); setStatus('idle', 'Listo'); loadHistory();
+  }catch(e){ showErr('Evaluación: ' + e.message); setStatus('idle', 'Error'); }
+  $('evalBtn').disabled = false;
+}
+function renderFeedback(fb){
+  const li = a => a.length ? `<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="muted">—</p>';
+  const box = $('fbBox'); box.hidden = false;
+  box.innerHTML = `
+    <div class="row"><div class="score s${fb.score}">${fb.score}/5</div><p style="flex:1;min-width:220px;font-weight:600">${esc(fb.verdict)}</p></div>
+    <div class="cols"><div class="good"><h3>Cubriste</h3>${li(fb.covered)}</div><div class="gap"><h3>Faltó</h3>${li(fb.missing)}</div></div>
+    <div><h3>Comunicación</h3><p>${esc(fb.communication)}</p></div>
+    <div><div class="row"><h3>Respuesta modelo</h3><button class="btn ghost" id="hearModel">Escucharla</button></div><p class="model">${esc(fb.model_answer)}</p></div>
+    <div><h3>Repregunta</h3><p>${esc(fb.follow_up)}</p></div>
+    <div class="row"><button class="btn" id="doFollow">Responder repregunta</button><button class="btn ghost" id="retry">Reintentar esta pregunta</button><button class="btn ghost" id="next2">Siguiente pregunta</button></div>`;
+  $('hearModel').onclick = () => speak(fb.model_answer).then(() => setStatus('idle', 'Listo'));
+  $('doFollow').onclick = async () => {
+    cur = {...cur, id: cur.id.replace(/-FU$/, '') + '-FU', text: fb.follow_up, followUp: true};
+    box.hidden = true; $('answerBox').hidden = true; renderQuestion(); await speakThenListen();
+  };
+  $('retry').onclick = async () => { box.hidden = true; $('answerBox').hidden = true; await speakThenListen(); };
+  $('next2').onclick = nextQuestion;
+  box.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+}
+async function loadHistory(){
+  try{
+    const rows = await (await api('/api/history')).json();
+    $('hist').innerHTML = rows.length ? rows.map(r => `<div><span class="mono muted">${esc(r.t.slice(5,16).replace('T',' '))}</span><strong class="s${r.feedback.score}">${r.feedback.score}/5</strong><span style="flex:1;min-width:0">${esc(r.question)}</span></div>`).join('')
+      : '<p class="muted">Sin respuestas evaluadas todavía.</p>';
+  }catch(e){}
+}
+
+$('start').onclick = nextQuestion;
+$('repeat').onclick = () => cur && speak(cur.text).then(() => setStatus('idle', 'Listo'));
+$('listen').onclick = startListening;
+$('stopRec').onclick = stopListening;
+$('evalBtn').onclick = evaluate;
+$('histBtn').onclick = loadHistory;
+loadConfig(); loadHistory();
+})();
+</script>
+</body>
+</html>
