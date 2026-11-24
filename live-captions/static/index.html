@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subtítulos en vivo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Schibsted+Grotesk:wght@700;800&display=swap">
+<style>
+:root{--bg:#f2f4f8;--surface:#fff;--sunk:#e7ebf2;--ink:#121826;--muted:#566176;--line:#d6dce7;--accent:#2343c2;--accent-soft:#e2e7fa;--on-accent:#fff;
+--rec:#c0182a;--rec-bg:#fde7e9;--warn:#8a5900;--warn-bg:#faefd4;--cap:1.15rem;
+--f-display:"Schibsted Grotesk",system-ui,sans-serif;--f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#0e121a;--surface:#161b26;--sunk:#1d2330;--ink:#e6e9f0;--muted:#9aa3b6;--line:#2a3242;--accent:#8099ff;--accent-soft:#1f2747;--on-accent:#0e121a;
+--rec:#ff6b78;--rec-bg:#35151a;--warn:#f0bd5a;--warn-bg:#2d2411;color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body)}
+.wrap{max-width:900px;margin:0 auto;padding:16px 16px 48px;display:flex;flex-direction:column;gap:16px}
+h1,h2{font-family:var(--f-display);margin:0;line-height:1.2}
+h1{font-size:1.5rem}h2{font-size:1.05rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.recbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--rec-bg);color:var(--rec);font-weight:700;border-bottom:2px solid var(--rec)}
+.recbar .dot{width:12px;height:12px;border-radius:50%;background:var(--rec);animation:pulse 1s infinite}
+.recbar.paused{background:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+.recbar.paused .dot{background:var(--warn);animation:none}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.recbar .dot{animation:none}}
+.meter{flex:1;max-width:200px;height:6px;border-radius:3px;background:rgba(127,127,127,.25);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:currentColor}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spacer{flex:1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:600;color:var(--muted)}
+select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+textarea{width:100%;min-height:60px;resize:vertical;font-size:.88rem}
+.chk{display:flex;gap:6px;align-items:center;font-size:.88rem}
+.btn{appearance:none;border:1px solid transparent;background:var(--accent);color:var(--on-accent);font:600 .92rem var(--f-body);padding:9px 15px;border-radius:8px;cursor:pointer;min-height:40px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.rec{background:var(--rec);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+details summary{cursor:pointer;font-weight:600}
+#captions{display:flex;flex-direction:column;gap:10px;max-height:58vh;overflow-y:auto;scroll-behavior:smooth;padding-right:4px}
+.cap{border-left:3px solid var(--line);padding:4px 0 4px 12px}
+.cap.latest{border-left-color:var(--accent)}
+.cap .meta{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.cap .txt{font-size:var(--cap);font-weight:500;line-height:1.45}
+.cap .tr{font-size:calc(var(--cap)*.9);color:var(--muted);margin-top:2px}
+.cap.pending .txt{color:var(--muted);font-style:italic;font-weight:400}
+.explain{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:var(--cap)}
+.err{background:var(--rec-bg);color:var(--rec);padding:8px 12px;border-radius:8px;font-weight:600;font-size:.88rem}
+.empty{color:var(--muted);text-align:center;padding:24px 0}
+</style>
+</head>
+<body>
+<div class="recbar" id="recbar" hidden role="status"><span class="dot"></span><span id="recText">Capturando audio</span><span class="meter" aria-hidden="true"><i id="level"></i></span></div>
+<div class="wrap">
+  <header><h1>Subtítulos en vivo</h1><p class="muted">Transcripción de la conversación en inglés (US o India) o español, con traducción opcional.</p></header>
+  <div id="warn"></div>
+
+  <section class="panel" aria-label="Controles">
+    <div class="row">
+      <label class="f" for="source">Fuente de audio<select id="source">
+        <option value="mic">Micrófono</option>
+        <option value="tab">Audio de una pestaña o pantalla (Chrome/Edge)</option></select></label>
+      <label class="f" for="lang">Idioma hablado<select id="lang">
+        <option value="auto">Automático: inglés US, inglés India o español</option>
+        <option value="eng">Solo inglés (US o India)</option>
+        <option value="spa">Solo español</option></select></label>
+    </div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="translate"> Traducir cada frase al</label>
+      <select id="target" aria-label="Idioma de traducción"><option value="es">español</option><option value="en">inglés</option></select>
+      <span class="spacer"></span>
+      <button class="btn ghost" id="smaller" aria-label="Texto más chico">A−</button>
+      <button class="btn ghost" id="bigger" aria-label="Texto más grande">A+</button>
+    </div>
+    <details><summary>Glosario y privacidad</summary>
+      <div class="panel" style="border:0;padding:12px 0 0">
+        <label class="f" for="glossary">Términos técnicos (separados por coma), se usan al traducir y aclarar
+          <textarea id="glossary">Azure, Microsoft Foundry, Azure OpenAI, RAG, AI Search, ITSM, ServiceNow, RCA, SLA, MTTR, LLM, MCP, Logic Apps, Application Insights, Entra ID</textarea></label>
+        <label class="chk"><input type="checkbox" id="save"> Guardar la transcripción en disco (live-captions/transcripts/)</label>
+        <p class="muted" style="font-size:.84rem">Por defecto no se guarda nada. El audio se envía a ElevenLabs para transcribir y, si activás traducción o aclaración, el texto se envía a Claude. Usalo solo con el conocimiento de las personas que participan.</p>
+      </div>
+    </details>
+    <div class="row">
+      <button class="btn" id="start">Iniciar captura</button>
+      <button class="btn ghost" id="pause" disabled>Pausar</button>
+      <button class="btn rec" id="stop" disabled>Detener</button>
+      <span class="spacer"></span>
+      <button class="btn ghost" id="clear">Borrar pantalla</button>
+    </div>
+    <div id="err"></div>
+  </section>
+
+  <section class="panel" aria-label="Subtítulos">
+    <div class="row"><h2>Subtítulos</h2><span class="spacer"></span>
+      <button class="btn" id="explainEs">¿Qué me preguntó? (ES)</button>
+      <button class="btn ghost" id="explainEn">What did they ask? (EN)</button></div>
+    <div class="explain" id="explain" hidden aria-live="polite"></div>
+    <div id="captions" aria-live="polite"><p class="empty" id="empty">Iniciá la captura para ver los subtítulos.</p></div>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let ws = null, stream = null, actx = null, analyser = null, rec = null, raf = 0;
+let capturing = false, paused = false, segStart = 0, spoke = false, lastVoice = 0, noise = 0.01;
+const SILENCE_MS = 700, MAX_SEG_MS = 12000, IDLE_RESET_MS = 15000;
+
+const showErr = m => { $('err').innerHTML = m ? `<p class="err">${esc(m)}</p>` : ''; };
+fetch('/api/config').then(r => r.json()).then(c => {
+  if (!c.elevenlabs) $('warn').innerHTML = '<p class="err">Falta ELEVENLABS_API_KEY en live-captions/.env</p>';
+}).catch(() => {});
+
+/* ---------- websocket ---------- */
+function sendConfig(){
+  if (ws && ws.readyState === 1) ws.send(JSON.stringify({type:'config', lang:$('lang').value, translate:$('translate').checked,
+    target:$('target').value, glossary:$('glossary').value.trim(), save:$('save').checked}));
+}
+function openWs(){
+  return new Promise((res, rej) => {
+    ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
+    ws.onopen = () => { sendConfig(); res(); };
+    ws.onerror = () => rej(new Error('No se pudo conectar con el servidor.'));
+    ws.onclose = () => { if (capturing) { showErr('Se perdió la conexión con el servidor.'); stopCapture(); } };
+    ws.onmessage = e => onMessage(JSON.parse(e.data));
+  });
+}
+function capEl(id){
+  let el = document.querySelector(`.cap[data-id="${id}"]`);
+  if (!el){
+    $('empty')?.remove();
+    el = document.createElement('div'); el.className = 'cap pending'; el.dataset.id = id;
+    el.innerHTML = '<div class="meta"></div><div class="txt">Transcribiendo…</div><div class="tr" hidden></div>';
+    $('captions').appendChild(el);
+  }
+  return el;
+}
+function markLatest(){
+  document.querySelectorAll('.cap.latest').forEach(e => e.classList.remove('latest'));
+  const all = document.querySelectorAll('.cap:not(.pending)'); if (all.length) all[all.length-1].classList.add('latest');
+}
+function scrollDown(){ const c = $('captions'); c.scrollTop = c.scrollHeight; }
+function onMessage(m){
+  if (m.type === 'pending'){ capEl(m.id); scrollDown(); }
+  else if (m.type === 'caption'){
+    const el = capEl(m.id); el.classList.remove('pending');
+    el.querySelector('.meta').textContent = `${m.t.slice(11,19)} · ${m.language || '?'}`;
+    el.querySelector('.txt').textContent = m.text; markLatest(); scrollDown();
+  }
+  else if (m.type === 'translation'){ const tr = capEl(m.id).querySelector('.tr'); tr.hidden = false; tr.textContent = m.text; scrollDown(); }
+  else if (m.type === 'empty'){ document.querySelector(`.cap[data-id="${m.id}"]`)?.remove(); }
+  else if (m.type === 'explanation'){ $('explain').hidden = false; $('explain').textContent = m.text; $('explainEs').disabled = $('explainEn').disabled = false; }
+  else if (m.type === 'error'){
+    if (m.id) document.querySelector(`.cap[data-id="${m.id}"]`)?.remove();
+    showErr(m.message); $('explainEs').disabled = $('explainEn').disabled = false;
+  }
+}
+
+/* ---------- audio capture, one file per phrase ---------- */
+async function getStream(){
+  if ($('source').value === 'tab'){
+    const s = await navigator.mediaDevices.getDisplayMedia({video:true, audio:true});
+    if (!s.getAudioTracks().length){ s.getTracks().forEach(t => t.stop()); throw new Error('No se compartió audio. Elegí una pestaña y marcá "Compartir audio".'); }
+    s.getVideoTracks().forEach(t => t.stop());
+    return new MediaStream(s.getAudioTracks());
+  }
+  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}});
+}
+function newRecorder(){
+  const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : '';
+  const r = new MediaRecorder(stream, mime ? {mimeType:mime} : undefined);
+  const chunks = []; r.ondataavailable = e => e.data.size && chunks.push(e.data);
+  r.onstop = () => { if (r._send && ws && ws.readyState === 1) new Blob(chunks, {type:r.mimeType}).arrayBuffer().then(b => ws.send(b)); };
+  r.start(250); segStart = performance.now(); spoke = false;
+  return r;
+}
+function cut(send){ if (rec && rec.state === 'recording'){ rec._send = send; rec.stop(); } rec = (capturing && !paused) ? newRecorder() : null; }
+function loop(){
+  const buf = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(buf);
+  let s = 0; for (const v of buf) s += v*v; const rms = Math.sqrt(s/buf.length), now = performance.now();
+  $('level').style.width = Math.min(100, rms*400) + '%';
+  if (!paused && rec){
+    if (!spoke) noise = noise*0.98 + rms*0.02;
+    if (rms > Math.max(0.012, noise*2.5)){ spoke = true; lastVoice = now; }
+    const len = now - segStart;
+    if (spoke && (now - lastVoice > SILENCE_MS || len > MAX_SEG_MS)) cut(true);
+    else if (!spoke && len > IDLE_RESET_MS) cut(false);
+  }
+  raf = requestAnimationFrame(loop);
+}
+async function startCapture(){
+  showErr('');
+  try { stream = await getStream(); } catch(e){ return showErr('Sin acceso al audio: ' + e.message); }
+  try { await openWs(); } catch(e){ stream.getTracks().forEach(t => t.stop()); return showErr(e.message); }
+  actx = new AudioContext(); analyser = actx.createAnalyser(); analyser.fftSize = 1024;
+  actx.createMediaStreamSource(stream).connect(analyser);
+  stream.getAudioTracks()[0].onended = stopCapture;
+  capturing = true; paused = false; rec = newRecorder(); raf = requestAnimationFrame(loop);
+  setUi();
+}
+function togglePause(){
+  paused = !paused;
+  if (paused) cut(true); else rec = newRecorder();
+  setUi();
+}
+function stopCapture(){
+  if (!capturing) return;
+  capturing = false; cut(true); paused = false;
+  cancelAnimationFrame(raf);
+  stream?.getTracks().forEach(t => t.stop()); actx?.close();
+  setTimeout(() => ws?.close(), 8000); // deja llegar la última transcripción
+  setUi();
+}
+function setUi(){
+  $('recbar').hidden = !capturing;
+  $('recbar').classList.toggle('paused', paused);
+  $('recText').textContent = paused ? 'Captura en pausa' : 'Capturando audio de la conversación';
+  $('start').disabled = capturing; $('pause').disabled = !capturing; $('stop').disabled = !capturing;
+  $('pause').textContent = paused ? 'Reanudar' : 'Pausar';
+  $('source').disabled = capturing;
+}
+
+function explain(target){
+  if (!ws || ws.readyState !== 1) return showErr('Iniciá la captura primero.');
+  $('explainEs').disabled = $('explainEn').disabled = true;
+  $('explain').hidden = false; $('explain').textContent = target === 'es' ? 'Aclarando…' : 'Clarifying…';
+  ws.send(JSON.stringify({type:'explain', target}));
+}
+
+let capSize = 1.15;
+const setSize = d => { capSize = Math.min(2, Math.max(.9, capSize + d)); document.documentElement.style.setProperty('--cap', capSize + 'rem'); };
+$('start').onclick = startCapture;
+$('pause').onclick = togglePause;
+$('stop').onclick = stopCapture;
+$('clear').onclick = () => { $('captions').innerHTML = '<p class="empty" id="empty">Pantalla borrada.</p>'; $('explain').hidden = true; ws?.readyState === 1 && ws.send(JSON.stringify({type:'clear'})); };
+$('explainEs').onclick = () => explain('es');
+$('explainEn').onclick = () => explain('en');
+$('smaller').onclick = () => setSize(-.1); $('bigger').onclick = () => setSize(.1);
+['lang','translate','target','glossary','save'].forEach(id => $(id).addEventListener('change', sendConfig));
+window.addEventListener('beforeunload', stopCapture);
+})();
+</script>
+</body>
+</html>
